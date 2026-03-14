@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HoMM3-Style Sprite Library - Part 3: Griffin, Spell Effects, Terrain, Quality Guide</title>
+<style>
+body { background: #1a1a2e; color: #e0e0e0; font-family: monospace; padding: 20px; }
+h1 { color: #ffd700; }
+h2 { color: #87ceeb; border-bottom: 1px solid #333; padding-bottom: 8px; }
+h3 { color: #90ee90; }
+.sprite-grid { display: flex; flex-wrap: wrap; gap: 30px; margin: 20px 0; }
+.sprite-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; min-width: 200px; }
+.sprite-card h4 { color: #ffd700; margin: 0 0 10px 0; text-align: center; }
+.sprite-display { background: #0d1b2a; border-radius: 4px; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 130px; }
+pre { background: #0a0a1a; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 11px; color: #a0d0a0; border: 1px solid #1a3a1a; max-height: 300px; }
+.note { background: #1a2a1a; border-left: 3px solid #ffd700; padding: 10px; margin: 10px 0; font-size: 13px; }
+.quality-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+.quality-table th { background: #0f3460; color: #ffd700; padding: 8px; text-align: left; }
+.quality-table td { padding: 8px; border-bottom: 1px solid #333; }
+.quality-table tr:hover { background: #16213e; }
+.bad { color: #ff6666; }
+.ok { color: #ffaa44; }
+.good { color: #66ff66; }
+.great { color: #44aaff; }
+</style>
+</head>
+<body>
+
+<h1>Part 3: Griffin, Spell Effects, Terrain, Quality Standards</h1>
+
+<!-- ============================================================ -->
+<h2>4. GRIFFIN (Eagle + Lion Hybrid)</h2>
+<!-- ============================================================ -->
+
+<div class="sprite-grid">
+<div class="sprite-card" style="min-width:300px">
+  <h4>Griffin</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="110" viewBox="0 0 130 110">
+  <defs>
+    <linearGradient id="lionbody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a855"/>
+      <stop offset="60%" style="stop-color:#a87c2a"/>
+      <stop offset="100%" style="stop-color:#6a4a10"/>
+    </linearGradient>
+    <linearGradient id="eaglewing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6914"/>
+      <stop offset="50%" style="stop-color:#5a4008"/>
+      <stop offset="100%" style="stop-color:#2a1a00"/>
+    </linearGradient>
+    <radialGradient id="geye" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" style="stop-color:#ffcc00"/>
+      <stop offset="100%" style="stop-color:#884400"/>
+    </radialGradient>
+    <linearGradient id="eaglehead" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c8c080"/>
+      <stop offset="100%" style="stop-color:#6a5820"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="65" cy="106" rx="30" ry="4" fill="#000" opacity="0.35"/>
+
+  <!-- TAIL (lion tail with tuft) -->
+  <path d="M92,72 Q108,68 118,60 Q124,52 118,46" stroke="url(#lionbody)" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Tail tuft -->
+  <path d="M118,46 Q122,40 120,34 Q116,36 114,42 Q112,46 116,48" fill="#6a4a10"/>
+  <path d="M118,46 Q124,38 126,32 Q122,34 118,40" fill="#8B6914"/>
+  <path d="M118,46 Q120,36 124,30 Q126,36 122,44" fill="#6a4a10"/>
+
+  <!-- WINGS (eagle-style, brown/dark) -->
+  <!-- Left wing -->
+  <path d="M45,42 Q22,22 8,30 Q12,42 22,48 Q34,54 44,55 Z" fill="url(#eaglewing)"/>
+  <line x1="45" y1="42" x2="8" y2="30" stroke="#3a2808" stroke-width="2"/>
+  <line x1="45" y1="42" x2="12" y2="42" stroke="#3a2808" stroke-width="1.5"/>
+  <line x1="45" y1="42" x2="16" y2="52" stroke="#3a2808" stroke-width="1.5"/>
+  <!-- Wing feather tips -->
+  <line x1="8" y1="30" x2="4" y2="24" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="12" y1="28" x2="8" y2="22" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="27" x2="13" y2="21" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="27" x2="18" y2="21" stroke="#a07820" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Wing texture -->
+  <path d="M45,42 Q30,34 18,32" stroke="#8B6914" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M44,47 Q32,42 20,42" stroke="#8B6914" stroke-width="1" fill="none" opacity="0.4"/>
+  <!-- Wing thumb claw -->
+  <polygon points="8,30 4,26 10,28" fill="#5a3808"/>
+
+  <!-- Right wing -->
+  <path d="M82,42 Q104,22 118,28 Q116,40 106,46 Q94,52 84,54 Z" fill="url(#eaglewing)"/>
+  <line x1="82" y1="42" x2="118" y2="28" stroke="#3a2808" stroke-width="2"/>
+  <line x1="82" y1="42" x2="114" y2="40" stroke="#3a2808" stroke-width="1.5"/>
+  <line x1="82" y1="42" x2="110" y2="50" stroke="#3a2808" stroke-width="1.5"/>
+  <line x1="118" y1="28" x2="122" y2="22" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="114" y1="26" x2="118" y2="20" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>
+  <line x1="110" y1="25" x2="113" y2="19" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="118,28 122,24 116,26" fill="#5a3808"/>
+
+  <!-- LION HAUNCHES (back half) -->
+  <!-- Back legs -->
+  <path d="M74,80 Q72,92 70,104" stroke="url(#lionbody)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <!-- Back left paw -->
+  <ellipse cx="68" cy="105" rx="7" ry="4" fill="#8B6914"/>
+  <line x1="63" y1="107" x2="61" y2="110" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+  <line x1="66" y1="108" x2="65" y2="111" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+  <line x1="69" y1="108" x2="69" y2="111" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+
+  <path d="M88,78 Q90,90 90,103" stroke="url(#lionbody)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <ellipse cx="90" cy="104" rx="7" ry="4" fill="#8B6914"/>
+  <line x1="85" y1="106" x2="84" y2="109" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+  <line x1="88" y1="107" x2="88" y2="110" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="107" x2="92" y2="110" stroke="#6a4a10" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- MAIN BODY (lion torso, rear) -->
+  <ellipse cx="78" cy="70" rx="22" ry="18" fill="url(#lionbody)"/>
+  <!-- Body fur texture -->
+  <path d="M60,62 Q65,58 70,62" stroke="#a07820" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M80,60 Q85,56 90,60" stroke="#a07820" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M62,70 Q68,66 74,70" stroke="#a07820" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+  <!-- EAGLE FRONT (chest/shoulders) -->
+  <ellipse cx="55" cy="62" rx="20" ry="18" fill="url(#eaglehead)" opacity="0.95"/>
+  <!-- Feather pattern on chest -->
+  <path d="M38,56 Q45,52 52,56 Q46,60 38,60 Z" fill="#8B6914" opacity="0.5"/>
+  <path d="M40,62 Q47,58 54,62 Q48,66 40,66 Z" fill="#8B6914" opacity="0.4"/>
+  <path d="M42,68 Q48,64 55,68 Q49,72 42,72 Z" fill="#a07820" opacity="0.3"/>
+
+  <!-- Eagle FRONT LEGS (talons) -->
+  <!-- Front left leg -->
+  <path d="M44,72 Q38,84 36,96" stroke="#a07820" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- Eagle talon (front left) -->
+  <path d="M32,96 Q28,102 26,108" stroke="#4a3808" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M34,97 Q32,104 30,108" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M37,97 Q36,104 36,108" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M40,96 Q40,102 42,107" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Front right leg -->
+  <path d="M62,72 Q62,84 62,96" stroke="#a07820" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M58,97 Q56,103 54,108" stroke="#4a3808" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M62,97 Q62,104 60,108" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M64,97 Q65,104 64,108" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M67,96 Q68,102 70,107" stroke="#4a3808" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- NECK (eagle) -->
+  <path d="M44,56 Q40,44 38,36 Q42,30 48,34 Q50,44 52,56" fill="url(#eaglehead)" stroke="#a07820" stroke-width="0.5"/>
+  <!-- Neck feathers -->
+  <path d="M44,54 Q38,46 40,38" stroke="#8B6914" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+  <!-- EAGLE HEAD -->
+  <ellipse cx="42" cy="26" rx="14" ry="12" fill="url(#eaglehead)"/>
+  <!-- Head crest/feathers -->
+  <path d="M36,18 Q32,10 34,4 Q38,8 36,14 Q38,8 42,4 Q42,10 40,16" fill="#5a4008"/>
+  <!-- Beak (hooked eagle beak) -->
+  <path d="M28,26 Q24,30 26,34 Q28,36 32,34 Q34,32 32,26 Z" fill="#cc9900"/>
+  <!-- Beak hook -->
+  <path d="M28,26 Q22,24 24,30" stroke="#aa7700" stroke-width="2" fill="none"/>
+  <!-- Beak highlight -->
+  <path d="M29,27 Q26,29 27,32" stroke="#ffcc44" stroke-width="1" fill="none" opacity="0.6"/>
+  <!-- EYE (fierce eagle eye) -->
+  <ellipse cx="44" cy="22" rx="5" ry="4" fill="#111100"/>
+  <ellipse cx="44" cy="22" rx="3.5" ry="3" fill="url(#geye)"/>
+  <ellipse cx="44" cy="22" rx="1.5" ry="2" fill="#110000"/>
+  <circle cx="43" cy="21" r="0.8" fill="white" opacity="0.9"/>
+  <!-- Brow ridge (eagle brow, menacing) -->
+  <path d="M39,18 Q44,16 50,18" stroke="#5a4008" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Ear tufts -->
+  <path d="M50,18 Q54,12 52,8" stroke="#8B6914" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M52,16 Q56,10 54,6" stroke="#6a4a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
+
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>5. SPELL EFFECTS & VISUAL FX</h2>
+<!-- ============================================================ -->
+
+<div class="sprite-grid">
+
+<!-- LIGHTNING BOLT -->
+<div class="sprite-card">
+  <h4>Lightning Bolt</h4>
+  <div class="sprite-display">
+<svg width="80" height="120" viewBox="0 0 80 120">
+  <defs>
+    <filter id="lightning">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.5 0 0 0 0.5  0.5 0 0 0 0.5  0 0 0 0 1  0 0 0 1 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Outer glow bolt -->
+  <polyline points="45,5 35,45 48,45 28,110" stroke="#8888ff" stroke-width="8" fill="none" stroke-linecap="round" filter="url(#lightning)" opacity="0.6"/>
+  <!-- Mid bolt -->
+  <polyline points="45,5 35,45 48,45 28,110" stroke="#aaaaff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Core (white hot) -->
+  <polyline points="45,5 35,45 48,45 28,110" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Branch bolt 1 -->
+  <polyline points="38,38 28,52 32,52 22,72" stroke="#8888ff" stroke-width="2" fill="none" opacity="0.6" filter="url(#lightning)"/>
+  <polyline points="38,38 28,52 32,52 22,72" stroke="#ccccff" stroke-width="1" fill="none"/>
+  <!-- Branch bolt 2 -->
+  <polyline points="46,55 58,68 54,68 62,85" stroke="#8888ff" stroke-width="2" fill="none" opacity="0.5" filter="url(#lightning)"/>
+  <polyline points="46,55 58,68 54,68 62,85" stroke="#ccccff" stroke-width="1" fill="none"/>
+  <!-- Impact burst at bottom -->
+  <circle cx="28" cy="110" r="12" fill="#4444ff" opacity="0.2" filter="url(#lightning)"/>
+  <circle cx="28" cy="110" r="6" fill="#8888ff" opacity="0.4"/>
+  <circle cx="28" cy="110" r="3" fill="white" opacity="0.8"/>
+  <!-- Spark rays -->
+  <line x1="28" y1="110" x2="14" y2="104" stroke="#aaaaff" stroke-width="1.5" opacity="0.7"/>
+  <line x1="28" y1="110" x2="42" y2="104" stroke="#aaaaff" stroke-width="1.5" opacity="0.7"/>
+  <line x1="28" y1="110" x2="18" y2="118" stroke="#ccccff" stroke-width="1" opacity="0.5"/>
+  <line x1="28" y1="110" x2="38" y2="118" stroke="#ccccff" stroke-width="1" opacity="0.5"/>
+</svg>
+  </div>
+</div>
+
+<!-- FIREBALL EXPLOSION -->
+<div class="sprite-card">
+  <h4>Fireball / Explosion</h4>
+  <div class="sprite-display">
+<svg width="100" height="100" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="exp" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="20%" style="stop-color:#ffee44"/>
+      <stop offset="50%" style="stop-color:#ff6600"/>
+      <stop offset="80%" style="stop-color:#cc2200"/>
+      <stop offset="100%" style="stop-color:#440000;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="expglow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Outer blast ring -->
+  <circle cx="50" cy="50" r="44" fill="#ff4400" opacity="0.15" filter="url(#expglow)"/>
+  <!-- Flame lobe shapes (irregular explosion outline) -->
+  <path d="M50,50 Q35,20 28,8 Q22,20 30,34 Q16,26 10,38 Q22,40 24,50 Q10,48 8,60 Q20,58 26,66 Q14,72 20,84 Q30,72 36,74 Q30,86 42,92 Q44,78 50,76 Q52,90 62,88 Q58,76 66,76 Q72,90 80,84 Q76,72 72,68 Q82,72 88,62 Q76,60 78,50 Q90,52 92,42 Q80,42 76,34 Q86,26 80,14 Q70,28 64,26 Q68,14 60,8 Q54,20 50,22 Q46,8 38,10 Q42,24 38,28 Q30,16 28,8 Q35,28 50,50 Z" fill="url(#exp)" filter="url(#expglow)"/>
+  <!-- Inner bright core -->
+  <circle cx="50" cy="50" r="18" fill="#ffffff" opacity="0.9" filter="url(#expglow)"/>
+  <circle cx="50" cy="50" r="10" fill="white"/>
+  <!-- Smoke wisps -->
+  <path d="M36,28 Q30,18 34,10 Q32,20 38,26" fill="#553333" opacity="0.4"/>
+  <path d="M62,24 Q68,14 66,6 Q62,16 58,22" fill="#553333" opacity="0.3"/>
+  <!-- Embers/sparks -->
+  <circle cx="20" cy="30" r="2" fill="#ffcc00"/>
+  <circle cx="78" cy="28" r="1.5" fill="#ffaa00"/>
+  <circle cx="15" cy="60" r="2" fill="#ff6600"/>
+  <circle cx="84" cy="62" r="1.5" fill="#ffcc00"/>
+  <circle cx="50" cy="10" r="2" fill="#ff8800"/>
+  <circle cx="25" cy="82" r="1.5" fill="#ffaa00"/>
+  <circle cx="72" cy="85" r="2" fill="#ff6600"/>
+</svg>
+  </div>
+</div>
+
+<!-- HEALING / HOLY LIGHT -->
+<div class="sprite-card">
+  <h4>Holy Light / Healing</h4>
+  <div class="sprite-display">
+<svg width="80" height="100" viewBox="0 0 80 100">
+  <defs>
+    <radialGradient id="holy" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="40%" style="stop-color:#ffffaa"/>
+      <stop offset="80%" style="stop-color:#ffcc44"/>
+      <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="holyglow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0.3  1 0 0 0 0.3  0 0 0 0 0  0 0 0 0.9 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Outer radiance rings -->
+  <circle cx="40" cy="50" r="36" fill="none" stroke="#ffcc44" stroke-width="1" opacity="0.2"/>
+  <circle cx="40" cy="50" r="28" fill="none" stroke="#ffdd66" stroke-width="1" opacity="0.3"/>
+  <circle cx="40" cy="50" r="20" fill="none" stroke="#ffee88" stroke-width="1.5" opacity="0.4"/>
+  <!-- Cross of light (holy symbol) -->
+  <rect x="37" y="20" width="6" height="60" rx="3" fill="url(#holy)" filter="url(#holyglow)"/>
+  <rect x="16" y="44" width="48" height="12" rx="3" fill="url(#holy)" filter="url(#holyglow)"/>
+  <!-- Center burst -->
+  <circle cx="40" cy="50" r="14" fill="url(#holy)" filter="url(#holyglow)"/>
+  <circle cx="40" cy="50" r="8" fill="white" opacity="0.9"/>
+  <!-- Diagonal rays -->
+  <line x1="40" y1="50" x2="18" y2="28" stroke="#ffdd44" stroke-width="2" opacity="0.4"/>
+  <line x1="40" y1="50" x2="62" y2="28" stroke="#ffdd44" stroke-width="2" opacity="0.4"/>
+  <line x1="40" y1="50" x2="18" y2="72" stroke="#ffdd44" stroke-width="2" opacity="0.4"/>
+  <line x1="40" y1="50" x2="62" y2="72" stroke="#ffdd44" stroke-width="2" opacity="0.4"/>
+  <!-- Sparkle stars -->
+  <path d="M40,20 L41.5,16 L43,20 L47,21.5 L43,23 L41.5,27 L40,23 L36,21.5 Z" fill="white" opacity="0.9"/>
+  <path d="M14,44 L15,42 L16,44 L18,45 L16,46 L15,48 L14,46 L12,45 Z" fill="#ffdd44" opacity="0.8"/>
+  <path d="M64,44 L65,42 L66,44 L68,45 L66,46 L65,48 L64,46 L62,45 Z" fill="#ffdd44" opacity="0.8"/>
+  <!-- Floating healing plus signs -->
+  <text x="22" y="30" font-size="10" fill="#ffdd44" opacity="0.7" font-family="monospace">+</text>
+  <text x="54" y="32" font-size="8" fill="#ffee88" opacity="0.6" font-family="monospace">+</text>
+  <text x="60" y="65" font-size="10" fill="#ffdd44" opacity="0.7" font-family="monospace">+</text>
+</svg>
+  </div>
+</div>
+
+<!-- ICE SHARD / BLIZZARD -->
+<div class="sprite-card">
+  <h4>Ice / Blizzard</h4>
+  <div class="sprite-display">
+<svg width="80" height="100" viewBox="0 0 80 100">
+  <defs>
+    <linearGradient id="iceshard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#eeffff"/>
+      <stop offset="50%" style="stop-color:#88ccee"/>
+      <stop offset="100%" style="stop-color:#2266aa;stop-opacity:0.7"/>
+    </linearGradient>
+    <filter id="iceglow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0  0.3 0 0 0 0.5  0 0 0 0 1  0 0 0 0.7 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Background ice field -->
+  <circle cx="40" cy="55" r="32" fill="#0a1a3a" opacity="0.6"/>
+  <circle cx="40" cy="55" r="32" fill="none" stroke="#4488cc" stroke-width="1" opacity="0.4"/>
+  <!-- Snowflake pattern (6-armed) -->
+  <g transform="translate(40,55)" filter="url(#iceglow)">
+    <!-- 6 main arms -->
+    <line x1="0" y1="-28" x2="0" y2="28" stroke="#88ddff" stroke-width="2"/>
+    <line x1="-24" y1="-14" x2="24" y2="14" stroke="#88ddff" stroke-width="2" transform="rotate(60)"/>
+    <line x1="-24" y1="-14" x2="24" y2="14" stroke="#88ddff" stroke-width="2" transform="rotate(-60)"/>
+    <!-- Branch decorations on each arm -->
+    <line x1="-8" y1="-14" x2="8" y2="-14" stroke="#aaeeff" stroke-width="1.5"/>
+    <line x1="-6" y1="-20" x2="6" y2="-20" stroke="#aaeeff" stroke-width="1"/>
+    <line x1="-8" y1="14" x2="8" y2="14" stroke="#aaeeff" stroke-width="1.5"/>
+    <line x1="-6" y1="20" x2="6" y2="20" stroke="#aaeeff" stroke-width="1"/>
+    <!-- Rotated branch sets -->
+    <g transform="rotate(60)">
+      <line x1="-8" y1="-14" x2="8" y2="-14" stroke="#aaeeff" stroke-width="1.5"/>
+      <line x1="-6" y1="-20" x2="6" y2="-20" stroke="#aaeeff" stroke-width="1"/>
+      <line x1="-8" y1="14" x2="8" y2="14" stroke="#aaeeff" stroke-width="1.5"/>
+    </g>
+    <g transform="rotate(-60)">
+      <line x1="-8" y1="-14" x2="8" y2="-14" stroke="#aaeeff" stroke-width="1.5"/>
+      <line x1="-8" y1="14" x2="8" y2="14" stroke="#aaeeff" stroke-width="1.5"/>
+    </g>
+    <!-- Center -->
+    <circle r="5" fill="#88ddff" opacity="0.9"/>
+    <circle r="2.5" fill="white"/>
+  </g>
+  <!-- Ice shards flying around -->
+  <polygon points="12,20 16,10 20,20 16,30" fill="url(#iceshard)" opacity="0.8" transform="rotate(-20,16,20)"/>
+  <polygon points="62,25 66,15 70,25 66,35" fill="url(#iceshard)" opacity="0.7" transform="rotate(15,66,25)"/>
+  <polygon points="8,72 10,62 14,72 10,82" fill="url(#iceshard)" opacity="0.6" transform="rotate(10,10,72)"/>
+  <polygon points="64,78 68,68 72,78 68,88" fill="url(#iceshard)" opacity="0.7" transform="rotate(-25,68,78)"/>
+  <!-- Small ice crystals -->
+  <circle cx="25" cy="12" r="3" fill="#aaddff" opacity="0.8"/>
+  <circle cx="56" cy="14" r="2" fill="#cceeFF" opacity="0.7"/>
+  <circle cx="15" cy="45" r="2.5" fill="#88ccff" opacity="0.6"/>
+  <circle cx="66" cy="48" r="2" fill="#aaddff" opacity="0.7"/>
+</svg>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. TERRAIN TILES (SVG Pattern-based)</h2>
+<!-- ============================================================ -->
+
+<div class="sprite-grid">
+
+<!-- GRASS TILE -->
+<div class="sprite-card">
+  <h4>Grass Tile</h4>
+  <div class="sprite-display">
+<svg width="80" height="80" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="grass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4aaa2a"/>
+      <stop offset="100%" style="stop-color:#2a6a14"/>
+    </linearGradient>
+    <pattern id="grasspat" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="url(#grass)"/>
+      <!-- Grass blades -->
+      <path d="M4,18 Q3,12 5,8 Q6,12 5,18" stroke="#5acc3a" stroke-width="1" fill="none"/>
+      <path d="M10,18 Q12,10 10,6 Q8,10 10,18" stroke="#3a8a22" stroke-width="1" fill="none"/>
+      <path d="M16,18 Q15,13 17,9 Q18,13 16,18" stroke="#5acc3a" stroke-width="1" fill="none"/>
+      <!-- Small pebble -->
+      <ellipse cx="13" cy="16" rx="2" ry="1.5" fill="#8a7a5a" opacity="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="80" height="80" fill="url(#grasspat)"/>
+  <!-- Tile border (subtle) -->
+  <rect width="80" height="80" fill="none" stroke="#2a6a14" stroke-width="1" opacity="0.5"/>
+</svg>
+  </div>
+</div>
+
+<!-- STONE/CASTLE FLOOR -->
+<div class="sprite-card">
+  <h4>Stone Tile</h4>
+  <div class="sprite-display">
+<svg width="80" height="80" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="stoneg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#888888"/>
+      <stop offset="100%" style="stop-color:#555555"/>
+    </linearGradient>
+    <pattern id="stonepat" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="url(#stoneg)"/>
+      <!-- Stone block grid (offset like real masonry) -->
+      <rect x="1" y="1" width="38" height="18" rx="1" fill="#7a7a7a" stroke="#444" stroke-width="0.5"/>
+      <rect x="1" y="21" width="18" height="18" rx="1" fill="#787878" stroke="#444" stroke-width="0.5"/>
+      <rect x="21" y="21" width="18" height="18" rx="1" fill="#7a7a7a" stroke="#444" stroke-width="0.5"/>
+      <!-- Mortar lines -->
+      <line x1="0" y1="20" x2="40" y2="20" stroke="#444" stroke-width="1.5"/>
+      <line x1="20" y1="20" x2="20" y2="40" stroke="#444" stroke-width="1.5"/>
+      <!-- Wear/crack marks -->
+      <path d="M8,5 Q10,8 12,6" stroke="#555" stroke-width="0.5" fill="none"/>
+      <path d="M28,25 Q30,28 29,30" stroke="#555" stroke-width="0.5" fill="none"/>
+      <!-- Light highlight on stone -->
+      <rect x="2" y="2" width="36" height="2" rx="1" fill="white" opacity="0.1"/>
+    </pattern>
+  </defs>
+  <rect width="80" height="80" fill="url(#stonepat)"/>
+  <rect width="80" height="80" fill="none" stroke="#333" stroke-width="1"/>
+</svg>
+  </div>
+</div>
+
+<!-- WATER TILE -->
+<div class="sprite-card">
+  <h4>Water Tile</h4>
+  <div class="sprite-display">
+<svg width="80" height="80" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="waterg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a6aaa"/>
+      <stop offset="100%" style="stop-color:#0a2a55"/>
+    </linearGradient>
+    <!-- Animated wave would use SMIL in real use -->
+    <pattern id="wavepat" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse">
+      <rect width="40" height="20" fill="url(#waterg)"/>
+      <!-- Wave crests -->
+      <path d="M0,8 Q5,4 10,8 Q15,12 20,8 Q25,4 30,8 Q35,12 40,8" stroke="#4a9acc" stroke-width="1.5" fill="none" opacity="0.6"/>
+      <path d="M0,14 Q5,10 10,14 Q15,18 20,14 Q25,10 30,14 Q35,18 40,14" stroke="#3a80aa" stroke-width="1" fill="none" opacity="0.5"/>
+      <!-- Highlight specular -->
+      <ellipse cx="12" cy="7" rx="3" ry="1" fill="white" opacity="0.2"/>
+      <ellipse cx="30" cy="12" rx="2.5" ry="0.8" fill="white" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="80" height="80" fill="url(#wavepat)"/>
+  <!-- Edge shimmer -->
+  <rect width="80" height="80" fill="none" stroke="#1a6aaa" stroke-width="1"/>
+</svg>
+  </div>
+</div>
+
+<!-- LAVA TILE -->
+<div class="sprite-card">
+  <h4>Lava Tile</h4>
+  <div class="sprite-display">
+<svg width="80" height="80" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="lavag" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#882200"/>
+      <stop offset="100%" style="stop-color:#440000"/>
+    </linearGradient>
+    <radialGradient id="lavaspot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffaa00"/>
+      <stop offset="60%" style="stop-color:#ff4400"/>
+      <stop offset="100%" style="stop-color:#880000;stop-opacity:0"/>
+    </radialGradient>
+    <pattern id="lavapat" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="url(#lavag)"/>
+      <!-- Lava flow cracks -->
+      <path d="M0,20 Q5,15 12,22 Q18,28 25,18 Q30,10 40,16" stroke="#ff6600" stroke-width="2" fill="none" opacity="0.7"/>
+      <path d="M0,30 Q8,26 14,32 Q20,38 28,30 Q34,24 40,28" stroke="#ff4400" stroke-width="1.5" fill="none" opacity="0.6"/>
+      <!-- Hot spots -->
+      <circle cx="8" cy="10" r="6" fill="url(#lavaspot)" opacity="0.8"/>
+      <circle cx="28" cy="28" r="5" fill="url(#lavaspot)" opacity="0.7"/>
+      <!-- Dark cooling crust -->
+      <path d="M18,2 Q22,6 26,2 Q28,8 22,10 Q18,8 18,2" fill="#220800" opacity="0.6"/>
+      <path d="M2,26 Q6,30 10,26 Q12,32 6,34 Q2,32 2,26" fill="#220800" opacity="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="80" height="80" fill="url(#lavapat)"/>
+  <rect width="80" height="80" fill="none" stroke="#882200" stroke-width="1"/>
+</svg>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>7. QUALITY STANDARDS & BENCHMARK</h2>
+<!-- ============================================================ -->
+
+<div class="note">Quality levels for HoMM3-style games. Minimum acceptable: Level 3. Target: Level 4-5.</div>
+
+<table class="quality-table">
+  <tr>
+    <th>Level</th><th>Description</th><th>SVG Elements</th><th>Key Differentiators</th><th>Verdict</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>Primitive shape</td>
+    <td>3-8 elements</td>
+    <td>Circle + rect, no detail</td>
+    <td class="bad">UNACCEPTABLE — prototype only</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>Stick figure / blob</td>
+    <td>8-15 elements</td>
+    <td>Basic limbs, no gradients</td>
+    <td class="bad">TOO SIMPLE — looks like a placeholder</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>Recognizable character</td>
+    <td>15-30 elements</td>
+    <td>Gradients, distinct silhouette, 2-3 colors</td>
+    <td class="ok">MINIMUM ACCEPTABLE — playable</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>Detailed character</td>
+    <td>30-60 elements</td>
+    <td>Armor detail, gradients, shadow, weapon, face</td>
+    <td class="good">GOOD — looks intentional, game-ready</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>HoMM3-quality</td>
+    <td>60-100+ elements</td>
+    <td>Scale/fur texture, glow effects, plume/mane, facial expression</td>
+    <td class="great">EXCELLENT — matches HoMM3 aesthetic</td>
+  </tr>
+</table>
+
+<h3>Minimum Requirements Checklist</h3>
+<pre>
+EVERY unit sprite MUST have:
+[ ] Distinct silhouette — recognizable from thumbnail
+[ ] At least 2 gradients (body shading + highlight)
+[ ] Shadow ellipse beneath unit
+[ ] Face/eyes (even if simple)
+[ ] Weapon or distinctive feature
+[ ] Faction-appropriate color palette
+
+QUALITY UNITS also include:
+[ ] feGaussianBlur glow on magical/fire elements
+[ ] Texture lines (fur, scales, armor ridges)
+[ ] Highlight ellipses on metal (white, 0.1-0.2 opacity)
+[ ] Proper layering: shadow > feet > legs > body > arms > head
+[ ] Readable at 60x80px AND 120x160px
+
+COLOR PALETTES BY FACTION:
+Castle  — steel blue/silver, red plumes, gold trim:  #c8d8e8, #cc2200, #ffd700
+Rampart — forest green, wood brown, gold:            #2a6a14, #5a3a10, #ffd700
+Dungeon — dark purple, black, crimson:               #3a1a6a, #220000, #cc2200
+Necro   — bone white, green glow, dark grey:         #e8ddc8, #00cc44, #333333
+Tower   — navy blue, silver, light blue:             #0a1a4a, #aabbcc, #88aadd
+Inferno — orange-red, dark red, yellow glow:         #ff4400, #660000, #ffcc00
+Fortress — swamp green, brown, rust:                 #3a5a2a, #6a4a2a, #8a5a2a
+</pre>
+
+<h3>Complete Sprite Build Guide (Step by Step)</h3>
+<pre>
+/* HOW TO BUILD A HIGH-QUALITY SVG SPRITE FROM SCRATCH */
+
+STEP 1: Define gradients in &lt;defs&gt;
+  - Primary material gradient (steel/leather/scales/skin)
+  - Highlight gradient (lighter version, for lit surfaces)
+  - Eye/glow radialGradient
+  - Any magical effect gradient
+
+STEP 2: Draw shadow
+  &lt;ellipse cx="CX" cy="BOTTOM" rx="14" ry="4" fill="#000" opacity="0.35"/&gt;
+
+STEP 3: Draw ground-contact parts first (boots, hooves, paws)
+  Use filled rects/paths, add darker bottom edge
+
+STEP 4: Draw legs (rect with rx for roundness)
+  Two rectangles + knee ellipses for articulation
+
+STEP 5: Draw hips/pelvis
+  Polygon or path connecting the legs to torso
+
+STEP 6: Draw torso/chest
+  Wide rect or ellipse, apply primary gradient
+  Add center-line ridge (line element)
+  Add highlight ellipse at upper-left (white, opacity 0.1-0.15)
+
+STEP 7: Draw arms
+  Upper arm rect + elbow ellipse + forearm rect
+  Apply same gradient as torso
+
+STEP 8: Draw shoulder pads/pauldrons
+  Ellipses over shoulder joints, slightly larger than arm width
+
+STEP 9: Draw weapon (right hand) or shield (left hand)
+  Sword: rect (grip) + thin polygon (blade) + rect (crossguard)
+  Shield: polygon with gradient + rim line + boss circle
+  Staff: thin rect + ornamental top + orb circle with glow
+
+STEP 10: Draw neck and head
+  Neck: small rect
+  Head: ellipse, slightly wider than neck
+  For helmets: helmet ellipse covers hair, add visor path
+
+STEP 11: Add face/helmet details
+  Visor slots: small dark rects
+  Helmet plume: curved path lines
+  Eyes (if visible): white ellipse + colored iris circle + dark pupil + white specular dot
+
+STEP 12: Add final polish
+  Glow filters for magical elements
+  Scale texture: repeated curved path strokes
+  Fur texture: short curved stroke lines
+
+SIZING REFERENCE:
+  Infantry unit:  60x80px viewBox, display at 80x110
+  Cavalry unit:  100x80px viewBox, display at 130x110
+  Dragon/large:  140x100px viewBox, display at 160x120
+  Building:      80x120px viewBox
+  Terrain tile:  64x64px or 80x80px
+</pre>
+
+</body>
+</html>

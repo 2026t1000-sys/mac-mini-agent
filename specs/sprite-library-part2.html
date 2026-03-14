@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HoMM3-Style Sprite Library - Part 2: Creatures & Animations</title>
+<style>
+body { background: #1a1a2e; color: #e0e0e0; font-family: monospace; padding: 20px; }
+h1 { color: #ffd700; }
+h2 { color: #87ceeb; border-bottom: 1px solid #333; padding-bottom: 8px; }
+h3 { color: #90ee90; }
+.sprite-grid { display: flex; flex-wrap: wrap; gap: 30px; margin: 20px 0; }
+.sprite-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; min-width: 200px; }
+.sprite-card h4 { color: #ffd700; margin: 0 0 10px 0; text-align: center; }
+.sprite-display { background: #0d1b2a; border-radius: 4px; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 140px; }
+pre { background: #0a0a1a; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 11px; color: #a0d0a0; border: 1px solid #1a3a1a; max-height: 300px; }
+.note { background: #1a2a1a; border-left: 3px solid #ffd700; padding: 10px; margin: 10px 0; font-size: 13px; }
+.anim-demo { background: #0d1b2a; border-radius: 4px; padding: 15px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<h1>Part 2: Creatures, Animation Systems, Canvas Drawing</h1>
+
+<!-- ============================================================ -->
+<h2>2. FANTASY CREATURES</h2>
+<!-- ============================================================ -->
+
+<div class="sprite-grid">
+
+<!-- DRAGON -->
+<div class="sprite-card">
+  <h4>Dragon</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120">
+  <defs>
+    <linearGradient id="dscale" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a8a22"/>
+      <stop offset="50%" style="stop-color:#2a5a12"/>
+      <stop offset="100%" style="stop-color:#142d08"/>
+    </linearGradient>
+    <linearGradient id="dbelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4b870"/>
+      <stop offset="100%" style="stop-color:#a08040"/>
+    </linearGradient>
+    <linearGradient id="dwing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a7a1a;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#0d2508;stop-opacity:0.7"/>
+    </linearGradient>
+    <radialGradient id="deye" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#ffdd00"/>
+      <stop offset="60%" style="stop-color:#ff8800"/>
+      <stop offset="100%" style="stop-color:#440000"/>
+    </radialGradient>
+    <filter id="fire">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0.3  0 0.4 0 0 0  0 0 0 0 0  0 0 0 0.9 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="fireball" cx="20%" cy="30%" r="80%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="30%" style="stop-color:#ffee44"/>
+      <stop offset="70%" style="stop-color:#ff6600"/>
+      <stop offset="100%" style="stop-color:#cc2200;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Shadow -->
+  <ellipse cx="70" cy="116" rx="40" ry="5" fill="#000" opacity="0.4"/>
+
+  <!-- TAIL -->
+  <path d="M100,85 Q120,90 130,80 Q138,70 132,62 Q128,58 122,65 Q118,75 108,78 Q100,80 95,85" fill="url(#dscale)" stroke="#1a4008" stroke-width="1"/>
+  <!-- Tail spikes -->
+  <polygon points="126,63 130,56 124,60" fill="#2a5a12"/>
+  <polygon points="131,68 136,63 129,66" fill="#2a5a12"/>
+  <!-- Tail tip spike -->
+  <polygon points="132,62 138,58 130,57" fill="#4a8a22"/>
+
+  <!-- BODY (main torso) -->
+  <ellipse cx="70" cy="80" rx="32" ry="22" fill="url(#dscale)"/>
+  <!-- Scale texture (rows of overlapping semicircles) -->
+  <path d="M42,72 Q48,68 54,72 Q60,68 66,72 Q72,68 78,72 Q84,68 90,72 Q96,68 100,72" fill="none" stroke="#1a4008" stroke-width="1.5" opacity="0.7"/>
+  <path d="M42,78 Q48,74 54,78 Q60,74 66,78 Q72,74 78,78 Q84,74 90,78 Q96,74 100,78" fill="none" stroke="#1a4008" stroke-width="1.5" opacity="0.7"/>
+  <path d="M45,84 Q51,80 57,84 Q63,80 69,84 Q75,80 81,84 Q87,80 93,84 Q99,80 103,84" fill="none" stroke="#1a4008" stroke-width="1.5" opacity="0.7"/>
+  <!-- Belly (lighter underside) -->
+  <ellipse cx="70" cy="86" rx="20" ry="12" fill="url(#dbelly)" opacity="0.8"/>
+  <!-- Belly segments -->
+  <path d="M52,82 Q62,78 70,82 Q78,78 88,82" stroke="#c09040" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M55,87 Q64,83 70,87 Q76,83 85,87" stroke="#c09040" stroke-width="1" fill="none" opacity="0.5"/>
+  <!-- Dorsal spines -->
+  <polygon points="55,62 52,52 58,60" fill="#4a8a22"/>
+  <polygon points="63,60 61,48 67,58" fill="#3a7a1a"/>
+  <polygon points="72,59 71,46 77,58" fill="#4a8a22"/>
+  <polygon points="81,61 80,50 86,60" fill="#3a7a1a"/>
+  <polygon points="89,65 88,55 93,64" fill="#4a8a22"/>
+
+  <!-- WINGS (spread) -->
+  <!-- Left wing -->
+  <path d="M55,68 Q30,40 10,30 Q5,50 18,65 Q30,78 50,80 Z" fill="url(#dwing)"/>
+  <!-- Wing membrane texture -->
+  <path d="M55,68 Q40,52 22,38" stroke="#2a5a12" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M52,74 Q38,62 22,52" stroke="#2a5a12" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M50,78 Q38,70 24,64" stroke="#2a5a12" stroke-width="1" fill="none" opacity="0.4"/>
+  <!-- Wing fingers (spars) -->
+  <line x1="55" y1="68" x2="10" y2="30" stroke="#1a4008" stroke-width="2"/>
+  <line x1="55" y1="68" x2="14" y2="48" stroke="#1a4008" stroke-width="1.5"/>
+  <line x1="55" y1="68" x2="18" y2="65" stroke="#1a4008" stroke-width="1.5"/>
+  <!-- Wing thumb claw -->
+  <polygon points="10,30 6,24 14,27" fill="#2a5a12"/>
+
+  <!-- Right wing -->
+  <path d="M85,68 Q110,40 130,32 Q135,52 122,66 Q110,78 90,80 Z" fill="url(#dwing)"/>
+  <path d="M85,68 Q100,52 118,38" stroke="#2a5a12" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M88,74 Q102,62 118,52" stroke="#2a5a12" stroke-width="1" fill="none" opacity="0.5"/>
+  <line x1="85" y1="68" x2="130" y2="32" stroke="#1a4008" stroke-width="2"/>
+  <line x1="85" y1="68" x2="126" y2="50" stroke="#1a4008" stroke-width="1.5"/>
+  <line x1="85" y1="68" x2="122" y2="66" stroke="#1a4008" stroke-width="1.5"/>
+  <polygon points="130,32 134,26 126,29" fill="#2a5a12"/>
+
+  <!-- LEGS -->
+  <!-- Front left leg -->
+  <path d="M52,90 Q45,98 42,108" stroke="url(#dscale)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <!-- Front left claws -->
+  <polygon points="38,110 34,116 42,112" fill="#1a4008"/>
+  <polygon points="42,112 40,118 46,114" fill="#1a4008"/>
+  <polygon points="44,112 44,118 49,113" fill="#1a4008"/>
+  <!-- Front right leg -->
+  <path d="M88,90 Q95,98 98,108" stroke="url(#dscale)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <polygon points="102,110 106,116 98,112" fill="#1a4008"/>
+  <polygon points="98,112 100,118 94,114" fill="#1a4008"/>
+  <polygon points="96,112 96,118 91,113" fill="#1a4008"/>
+
+  <!-- NECK -->
+  <path d="M55,65 Q50,52 45,42 Q48,36 55,38 Q58,50 62,62" fill="url(#dscale)" stroke="#1a4008" stroke-width="1"/>
+  <!-- Neck scales -->
+  <path d="M52,58 Q56,54 60,58" stroke="#1a4008" stroke-width="1" fill="none"/>
+  <path d="M50,52 Q54,48 58,52" stroke="#1a4008" stroke-width="1" fill="none"/>
+  <!-- Neck underside -->
+  <path d="M54,65 Q53,54 51,44" stroke="#d4b870" stroke-width="3" fill="none" opacity="0.6"/>
+
+  <!-- HEAD -->
+  <!-- Skull -->
+  <ellipse cx="43" cy="34" rx="14" ry="11" fill="url(#dscale)"/>
+  <!-- Snout -->
+  <path d="M30,34 Q28,38 32,42 L45,40 L44,34 Z" fill="url(#dscale)"/>
+  <!-- Nostril -->
+  <ellipse cx="31" cy="39" rx="2" ry="1.5" fill="#142d08"/>
+  <!-- EYES -->
+  <ellipse cx="46" cy="28" rx="5" ry="4" fill="url(#deye)"/>
+  <ellipse cx="46" cy="28" rx="2" ry="3" fill="#110000"/>
+  <!-- Eye slit (vertical pupil) -->
+  <line x1="46" y1="25" x2="46" y2="31" stroke="#000" stroke-width="2"/>
+  <!-- Brow ridge -->
+  <path d="M41,24 Q46,21 51,23" stroke="#1a4008" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Horns -->
+  <path d="M50,22 Q55,14 52,8" stroke="#2a5a12" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M43,21 Q44,12 42,6" stroke="#2a5a12" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Horn tips -->
+  <circle cx="52" cy="8" r="2" fill="#4a8a22"/>
+  <circle cx="42" cy="6" r="1.5" fill="#4a8a22"/>
+  <!-- Teeth -->
+  <path d="M30,40 L32,36 L34,40 L36,36 L38,40 L40,36 L42,40" stroke="#e8e0c8" stroke-width="1.5" fill="none"/>
+  <!-- Jaw lower -->
+  <path d="M30,40 Q36,46 44,44 L44,40" fill="#1a4008" stroke="#1a4008" stroke-width="0.5"/>
+
+  <!-- FIRE BREATH -->
+  <path d="M28,40 Q15,36 8,38 Q2,40 0,44 Q5,44 12,42 Q18,46 10,50 Q18,48 22,52 Q16,56 18,58 Q24,52 26,46 Q30,50 28,56 Q34,48 30,42 Z" fill="url(#fireball)" filter="url(#fire)" opacity="0.9"/>
+</svg>
+
+  </div>
+</div>
+
+<!-- SKELETON -->
+<div class="sprite-card">
+  <h4>Skeleton Warrior</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="70" height="120" viewBox="0 0 70 120">
+  <defs>
+    <linearGradient id="bone" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8ddc8"/>
+      <stop offset="60%" style="stop-color:#c8b89a"/>
+      <stop offset="100%" style="stop-color:#a89070"/>
+    </linearGradient>
+    <radialGradient id="eyegl" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#44ff44"/>
+      <stop offset="60%" style="stop-color:#00aa00"/>
+      <stop offset="100%" style="stop-color:#003300"/>
+    </radialGradient>
+    <filter id="skglow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0  0 1 0 0 0.2  0 0 0 0 0  0 0 0 0.8 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <ellipse cx="35" cy="116" rx="14" ry="4" fill="#000" opacity="0.4"/>
+
+  <!-- FEET/TARSAL bones -->
+  <path d="M24,108 Q22,112 28,114 Q32,114 30,108" fill="url(#bone)"/>
+  <path d="M40,108 Q38,112 44,114 Q48,114 46,108" fill="url(#bone)"/>
+  <!-- Toe phalanges -->
+  <rect x="22" y="112" width="4" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="27" y="112" width="4" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="38" y="112" width="4" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="43" y="112" width="4" height="3" rx="1" fill="url(#bone)"/>
+
+  <!-- TIBIA/FIBULA (lower leg) -->
+  <rect x="25" y="90" width="6" height="20" rx="2" fill="url(#bone)"/>
+  <rect x="28" y="90" width="3" height="20" rx="1" fill="#a89070" opacity="0.5"/>
+  <rect x="39" y="90" width="6" height="20" rx="2" fill="url(#bone)"/>
+  <rect x="42" y="90" width="3" height="20" rx="1" fill="#a89070" opacity="0.5"/>
+  <!-- Knee joint (patella) -->
+  <ellipse cx="28" cy="90" rx="5" ry="4" fill="url(#bone)"/>
+  <ellipse cx="42" cy="90" rx="5" ry="4" fill="url(#bone)"/>
+
+  <!-- FEMUR (thigh) -->
+  <rect x="25" y="72" width="7" height="20" rx="3" fill="url(#bone)"/>
+  <rect x="38" y="72" width="7" height="20" rx="3" fill="url(#bone)"/>
+  <!-- Hip joint -->
+  <ellipse cx="28" cy="72" rx="6" ry="4" fill="url(#bone)"/>
+  <ellipse cx="42" cy="72" rx="6" ry="4" fill="url(#bone)"/>
+
+  <!-- PELVIS -->
+  <path d="M20,70 Q28,66 35,68 Q42,66 50,70 Q48,78 35,78 Q22,78 20,70 Z" fill="url(#bone)"/>
+  <!-- Iliac crest -->
+  <path d="M20,70 Q22,65 28,64" stroke="#c8b89a" stroke-width="2" fill="none"/>
+  <path d="M50,70 Q48,65 42,64" stroke="#c8b89a" stroke-width="2" fill="none"/>
+
+  <!-- SPINE (visible vertebrae) -->
+  <rect x="33" y="44" width="4" height="24" rx="1" fill="#c8b89a" opacity="0.6"/>
+  <!-- Vertebra bumps -->
+  <rect x="32" y="46" width="6" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="32" y="51" width="6" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="32" y="56" width="6" height="3" rx="1" fill="url(#bone)"/>
+  <rect x="32" y="61" width="6" height="3" rx="1" fill="url(#bone)"/>
+
+  <!-- RIBCAGE -->
+  <!-- Sternum -->
+  <rect x="31" y="44" width="8" height="22" rx="2" fill="#c8b89a" opacity="0.4"/>
+  <!-- Ribs (both sides) -->
+  <path d="M31,47 Q22,44 18,48 Q16,54 22,54 Q26,54 31,52" fill="none" stroke="url(#bone)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M31,52 Q22,50 18,54 Q16,60 22,60 Q26,60 31,57" fill="none" stroke="url(#bone)" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M31,57 Q22,55 19,59 Q17,64 23,64 Q27,64 31,62" fill="none" stroke="url(#bone)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M39,47 Q48,44 52,48 Q54,54 48,54 Q44,54 39,52" fill="none" stroke="url(#bone)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M39,52 Q48,50 52,54 Q54,60 48,60 Q44,60 39,57" fill="none" stroke="url(#bone)" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M39,57 Q48,55 51,59 Q53,64 47,64 Q43,64 39,62" fill="none" stroke="url(#bone)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- CLAVICLE (collar bone) -->
+  <path d="M28,44 Q35,42 42,44" stroke="url(#bone)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- LEFT ARM (ulna/radius) -->
+  <!-- Upper arm (humerus) -->
+  <rect x="14" y="44" width="6" height="18" rx="3" fill="url(#bone)"/>
+  <!-- Elbow -->
+  <ellipse cx="17" cy="63" rx="5" ry="4" fill="url(#bone)"/>
+  <!-- Forearm -->
+  <rect x="14" y="64" width="4" height="16" rx="2" fill="url(#bone)"/>
+  <rect x="18" y="64" width="3" height="16" rx="2" fill="#c8b89a" opacity="0.7"/>
+  <!-- Hand / Metacarpals -->
+  <ellipse cx="16" cy="81" rx="5" ry="3" fill="url(#bone)"/>
+  <!-- Finger phalanges -->
+  <rect x="12" y="82" width="3" height="6" rx="1" fill="url(#bone)"/>
+  <rect x="15" y="82" width="3" height="7" rx="1" fill="url(#bone)"/>
+  <rect x="18" y="82" width="2" height="5" rx="1" fill="url(#bone)"/>
+
+  <!-- RIGHT ARM holding sword -->
+  <rect x="50" y="44" width="6" height="18" rx="3" fill="url(#bone)"/>
+  <ellipse cx="53" cy="63" rx="5" ry="4" fill="url(#bone)"/>
+  <rect x="51" y="64" width="4" height="16" rx="2" fill="url(#bone)"/>
+  <rect x="50" y="81" width="9" height="4" rx="2" fill="url(#bone)"/>
+  <rect x="54" y="82" width="3" height="5" rx="1" fill="url(#bone)"/>
+  <!-- Rusty sword -->
+  <rect x="55" y="20" width="4" height="60" rx="1" fill="#8a6a4a"/>
+  <line x1="57" y1="20" x2="57" y2="80" stroke="#aa8a6a" stroke-width="1" opacity="0.5"/>
+  <rect x="50" y="74" width="14" height="3" rx="1" fill="#6a4a2a"/>
+  <circle cx="57" cy="78" r="2" fill="#6a4a2a"/>
+  <!-- Rust spots -->
+  <circle cx="57" cy="40" r="2" fill="#6a3a1a" opacity="0.7"/>
+  <circle cx="57" cy="55" r="1.5" fill="#6a3a1a" opacity="0.6"/>
+
+  <!-- SKULL -->
+  <!-- Cranium -->
+  <ellipse cx="35" cy="28" rx="13" ry="14" fill="url(#bone)"/>
+  <!-- Zygomatic arch (cheekbones) -->
+  <path d="M22,30 Q20,34 22,38" stroke="url(#bone)" stroke-width="3" fill="none"/>
+  <path d="M48,30 Q50,34 48,38" stroke="url(#bone)" stroke-width="3" fill="none"/>
+  <!-- Nasal cavity -->
+  <path d="M33,35 L35,30 L37,35 Z" fill="#2a2a1a"/>
+  <!-- Mandible (jaw) -->
+  <path d="M23,38 Q35,50 47,38 L47,44 Q35,52 23,44 Z" fill="url(#bone)"/>
+  <!-- Teeth (jaw) -->
+  <rect x="27" y="42" width="4" height="6" rx="1" fill="white"/>
+  <rect x="32" y="42" width="4" height="7" rx="1" fill="white"/>
+  <rect x="37" y="42" width="4" height="7" rx="1" fill="white"/>
+  <rect x="42" y="42" width="3" height="6" rx="1" fill="white"/>
+  <!-- Cranial suture lines -->
+  <path d="M35,15 Q37,20 35,25" stroke="#c8b89a" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <!-- EYE SOCKETS (glowing) -->
+  <ellipse cx="29" cy="28" rx="6" ry="5" fill="#111108"/>
+  <ellipse cx="41" cy="28" rx="6" ry="5" fill="#111108"/>
+  <!-- Glowing eyes -->
+  <ellipse cx="29" cy="28" rx="3.5" ry="3" fill="url(#eyegl)" filter="url(#skglow)"/>
+  <ellipse cx="41" cy="28" rx="3.5" ry="3" fill="url(#eyegl)" filter="url(#skglow)"/>
+  <!-- Eye highlight -->
+  <circle cx="28" cy="27" r="1" fill="#aaffaa" opacity="0.8"/>
+  <circle cx="40" cy="27" r="1" fill="#aaffaa" opacity="0.8"/>
+</svg>
+
+  </div>
+</div>
+
+<!-- PEGASUS -->
+<div class="sprite-card">
+  <h4>Pegasus</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="110" viewBox="0 0 130 110">
+  <defs>
+    <linearGradient id="whitecoat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="60%" style="stop-color:#e8e8f8"/>
+      <stop offset="100%" style="stop-color:#c0c0d8"/>
+    </linearGradient>
+    <linearGradient id="winggrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95"/>
+      <stop offset="50%" style="stop-color:#d8d8f0;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#a0a0c8;stop-opacity:0.6"/>
+    </linearGradient>
+    <radialGradient id="pegeye" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" style="stop-color:#88aaff"/>
+      <stop offset="100%" style="stop-color:#223388"/>
+    </radialGradient>
+    <filter id="pegwing">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <ellipse cx="65" cy="107" rx="30" ry="4" fill="#000" opacity="0.3"/>
+
+  <!-- WINGS (spread gloriously wide) -->
+  <!-- Left wing -->
+  <path d="M42,40 Q20,20 5,28 Q10,38 20,42 Q30,46 38,48 Z" fill="url(#winggrad)" stroke="#c0c0d8" stroke-width="0.5" filter="url(#pegwing)"/>
+  <!-- Wing feather layers -->
+  <path d="M42,40 Q25,30 10,32" stroke="#d8d8f0" stroke-width="2" fill="none"/>
+  <path d="M42,40 Q26,34 12,38" stroke="#d8d8f0" stroke-width="1.5" fill="none"/>
+  <path d="M42,40 Q28,38 15,42" stroke="#d8d8f0" stroke-width="1.5" fill="none"/>
+  <path d="M42,40 Q30,42 18,46" stroke="#d8d8f0" stroke-width="1" fill="none"/>
+  <!-- Wing feather tips (individual primary feathers) -->
+  <line x1="5" y1="28" x2="2" y2="22" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="9" y1="30" x2="5" y2="24" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="31" x2="9" y2="25" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="17" y1="32" x2="14" y2="26" stroke="#eeeeee" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Right wing -->
+  <path d="M78,40 Q100,20 120,25 Q118,36 108,40 Q96,45 86,47 Z" fill="url(#winggrad)" stroke="#c0c0d8" stroke-width="0.5" filter="url(#pegwing)"/>
+  <path d="M78,40 Q96,30 114,28" stroke="#d8d8f0" stroke-width="2" fill="none"/>
+  <path d="M78,40 Q96,34 112,34" stroke="#d8d8f0" stroke-width="1.5" fill="none"/>
+  <path d="M78,40 Q96,38 110,38" stroke="#d8d8f0" stroke-width="1.5" fill="none"/>
+  <path d="M78,40 Q96,42 108,44" stroke="#d8d8f0" stroke-width="1" fill="none"/>
+  <line x1="120" y1="25" x2="124" y2="19" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="116" y1="26" x2="120" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="112" y1="27" x2="116" y2="21" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- LEGS -->
+  <!-- Front left (rearing) -->
+  <path d="M50,75 Q44,82 40,92" stroke="url(#whitecoat)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M40,92 Q38,98 40,104" stroke="#c8c8d8" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Hoof front left -->
+  <ellipse cx="40" cy="105" rx="5" ry="3" fill="#666688"/>
+  <!-- Front right (rearing) -->
+  <path d="M56,76 Q56,84 52,92" stroke="url(#whitecoat)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M52,92 Q50,98 52,104" stroke="#c8c8d8" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <ellipse cx="52" cy="105" rx="5" ry="3" fill="#666688"/>
+  <!-- Back left -->
+  <path d="M72,78 Q68,88 66,100" stroke="url(#whitecoat)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <ellipse cx="66" cy="103" rx="5" ry="3" fill="#666688"/>
+  <!-- Back right -->
+  <path d="M80,76 Q82,86 82,100" stroke="url(#whitecoat)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <ellipse cx="82" cy="103" rx="5" ry="3" fill="#666688"/>
+
+  <!-- BODY -->
+  <ellipse cx="64" cy="64" rx="26" ry="18" fill="url(#whitecoat)"/>
+  <!-- Body shading (underside) -->
+  <ellipse cx="64" cy="70" rx="18" ry="10" fill="#d8d8e8" opacity="0.5"/>
+  <!-- Body highlight -->
+  <ellipse cx="56" cy="56" rx="10" ry="6" fill="white" opacity="0.4"/>
+  <!-- Chest musculature -->
+  <path d="M40,60 Q50,52 60,58" stroke="#e0e0f0" stroke-width="2" fill="none" opacity="0.6"/>
+
+  <!-- NECK -->
+  <path d="M46,55 Q44,42 50,34 Q56,30 60,38 Q58,48 56,58" fill="url(#whitecoat)" stroke="#c8c8d8" stroke-width="0.5"/>
+  <!-- Mane -->
+  <path d="M48,54 Q42,46 44,38 Q46,34 50,34" fill="none" stroke="#ccbbff" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M50,52 Q46,44 48,36" fill="none" stroke="#aabbff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <path d="M52,50 Q50,42 52,36" fill="none" stroke="#ddccff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- HEAD -->
+  <ellipse cx="52" cy="26" rx="12" ry="10" fill="url(#whitecoat)"/>
+  <!-- Snout -->
+  <path d="M40,28 Q38,32 42,34 L52,32 L52,26 Z" fill="url(#whitecoat)"/>
+  <!-- Nostril -->
+  <ellipse cx="40" cy="32" rx="2" ry="1.5" fill="#ccbbdd" opacity="0.6"/>
+  <!-- EYE -->
+  <ellipse cx="56" cy="22" rx="4" ry="3.5" fill="url(#pegeye)"/>
+  <ellipse cx="56" cy="22" rx="2" ry="2.5" fill="#111133"/>
+  <circle cx="55" cy="21" r="1" fill="white" opacity="0.8"/>
+  <!-- Eye lashes -->
+  <line x1="53" y1="19" x2="52" y2="17" stroke="#c8c8d8" stroke-width="1"/>
+  <line x1="56" y1="18" x2="56" y2="16" stroke="#c8c8d8" stroke-width="1"/>
+  <line x1="59" y1="19" x2="60" y2="17" stroke="#c8c8d8" stroke-width="1"/>
+  <!-- Muzzle -->
+  <path d="M40,30 Q44,36 50,34" stroke="#ccbbdd" stroke-width="1.5" fill="none"/>
+  <!-- HORN (Alicorn) -->
+  <polygon points="52,16 56,2 58,16" fill="#ffeeaa" stroke="#ffd700" stroke-width="0.5"/>
+  <line x1="55" y1="3" x2="54" y2="16" stroke="#ffd700" stroke-width="0.5" opacity="0.5"/>
+  <!-- Horn glow -->
+  <ellipse cx="56" cy="2" rx="4" ry="4" fill="#ffffaa" opacity="0.4" filter="url(#pegwing)"/>
+  <!-- Forelock (mane on forehead) -->
+  <path d="M46,20 Q44,14 46,10 Q50,8 52,14 Q50,18 48,22" fill="#ccbbff" opacity="0.8"/>
+  <path d="M50,18 Q48,12 52,8 Q54,12 54,18" fill="#aabbff" opacity="0.7"/>
+  <!-- TAIL -->
+  <path d="M88,68 Q96,62 98,54 Q100,46 96,42" fill="none" stroke="#ccbbff" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+  <path d="M88,68 Q98,64 102,56 Q106,48 100,38" fill="none" stroke="#aabbff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <path d="M88,68 Q100,62 104,52 Q108,42 102,34" fill="none" stroke="#eeddff" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+</svg>
+
+  </div>
+</div>
+</div><!-- end sprite-grid -->
+
+<!-- ============================================================ -->
+<h2>3. ANIMATION SYSTEMS</h2>
+<!-- ============================================================ -->
+
+<div class="note">Three animation approaches: CSS keyframes (simplest), SVG SMIL (no JS needed), Canvas requestAnimationFrame (most powerful). Mix as needed.</div>
+
+<h3>3a. CSS Breathing / Idle Animation</h3>
+<div class="anim-demo">
+
+<style>
+/* Breathing idle: slow scale pulse on torso */
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50% { transform: scaleY(1.04) translateY(-1px); }
+}
+/* Floating idle: gentle bob up/down */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+/* Weapon glint: opacity flash on blade */
+@keyframes glint {
+  0%, 80%, 100% { opacity: 0; }
+  85% { opacity: 1; }
+  90% { opacity: 0.3; }
+}
+/* Eye glow pulse for undead */
+@keyframes eyepulse {
+  0%, 100% { filter: drop-shadow(0 0 2px #00ff00); opacity: 0.8; }
+  50% { filter: drop-shadow(0 0 6px #00ff00); opacity: 1; }
+}
+/* Attack swing */
+@keyframes swordswing {
+  0% { transform: rotate(0deg) translateX(0); }
+  20% { transform: rotate(-40deg) translateX(5px); }
+  50% { transform: rotate(60deg) translateX(-8px); }
+  80% { transform: rotate(20deg) translateX(-3px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+/* Death fall */
+@keyframes deathfall {
+  0% { transform: rotate(0deg) translateY(0); opacity: 1; }
+  30% { transform: rotate(-10deg) translateY(-5px); opacity: 1; }
+  100% { transform: rotate(-90deg) translateY(30px); opacity: 0; }
+}
+/* Magic cast: orb pulse */
+@keyframes orbpulse {
+  0%, 100% { r: 8; opacity: 0.8; }
+  50% { r: 12; opacity: 1; }
+}
+
+.idle-demo { display: inline-block; animation: float 3s ease-in-out infinite; }
+.glint-demo { animation: glint 4s ease-in-out infinite; }
+.eyepulse-demo { animation: eyepulse 2s ease-in-out infinite; }
+</style>
+
+<!-- Floating wizard demo -->
+<div class="idle-demo">
+<svg width="60" height="80" viewBox="0 0 60 80">
+  <defs>
+    <linearGradient id="r2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a1a6a"/>
+      <stop offset="100%" style="stop-color:#120530"/>
+    </linearGradient>
+  </defs>
+  <!-- Simplified wizard for animation demo -->
+  <path d="M10,40 Q5,55 5,78 L55,78 Q55,55 50,40 Z" fill="url(#r2)"/>
+  <rect x="22" y="32" width="16" height="10" rx="2" fill="#e8c8b0"/>
+  <ellipse cx="30" cy="24" rx="10" ry="11" fill="#e8c8b0"/>
+  <path d="M20,24 Q30,2 40,24" fill="#3a1a6a"/>
+  <ellipse cx="20" cy="24" rx="12" ry="4" fill="#3a1a6a"/>
+  <ellipse cx="26" cy="20" rx="2" ry="2" fill="#3366aa"/>
+  <ellipse cx="34" cy="20" rx="2" ry="2" fill="#3366aa"/>
+</svg>
+</div>
+
+<span style="color:#ffd700; margin-left: 20px;">← Floating idle animation (CSS translateY)</span>
+
+</div>
+
+<pre>
+/* ===== CSS ANIMATION TEMPLATES ===== */
+
+/* 1. IDLE BREATHE — apply to torso element */
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50%       { transform: scaleY(1.04) translateY(-1px); }
+}
+.torso { animation: breathe 3s ease-in-out infinite; transform-origin: bottom center; }
+
+/* 2. IDLE FLOAT — apply to whole sprite for flying units */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+.flying-unit { animation: float 3s ease-in-out infinite; }
+
+/* 3. WEAPON GLINT — apply to sword/blade polygon */
+@keyframes glint {
+  0%, 80%, 100% { opacity: 0; }
+  85%            { opacity: 0.9; }
+  90%            { opacity: 0.2; }
+}
+.blade-glint { animation: glint 5s ease-in-out infinite; }
+
+/* 4. UNDEAD EYE GLOW — apply to eye circles of undead */
+@keyframes eyepulse {
+  0%, 100% { filter: drop-shadow(0 0 2px #00ff00); }
+  50%       { filter: drop-shadow(0 0 8px #00ff00); }
+}
+.undead-eye { animation: eyepulse 2s ease-in-out infinite; }
+
+/* 5. ATTACK SWING — apply to weapon group, trigger on click/event */
+@keyframes swordswing {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-45deg); }  /* windup */
+  60%  { transform: rotate(70deg); }   /* swing through */
+  80%  { transform: rotate(15deg); }   /* follow through */
+  100% { transform: rotate(0deg); }    /* return */
+}
+.sword-arm.attacking {
+  animation: swordswing 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: shoulder-point;   /* set with transform-origin: 0 0 on group */
+}
+
+/* 6. DEATH FALL */
+@keyframes deathfall {
+  0%   { transform: rotate(0deg) translateY(0); opacity: 1; }
+  30%  { transform: rotate(-15deg) translateY(-5px); opacity: 1; }
+  100% { transform: rotate(-90deg) translateY(35px); opacity: 0; }
+}
+.unit.dying { animation: deathfall 0.8s ease-in forwards; }
+
+/* 7. MAGIC CAST — scale up orb then release burst */
+@keyframes castcharge {
+  0%   { transform: scale(1); filter: brightness(1); }
+  70%  { transform: scale(1.6); filter: brightness(2); }
+  100% { transform: scale(0.1); opacity: 0; }
+}
+.magic-orb.casting { animation: castcharge 0.8s ease-in forwards; }
+</pre>
+
+<h3>3b. SVG SMIL Animation (no JS)</h3>
+<div class="anim-demo">
+<svg width="100" height="100" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="fireball2" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#fff"/>
+      <stop offset="40%" style="stop-color:#ffcc00"/>
+      <stop offset="100%" style="stop-color:#ff4400;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <!-- Spinning magic circle -->
+  <g transform="translate(50,50)">
+    <animateTransform attributeName="transform" type="rotate"
+      from="0 50 50" to="360 50 50" dur="4s" repeatCount="indefinite" additive="sum"/>
+    <circle r="30" fill="none" stroke="#4466ff" stroke-width="1.5" stroke-dasharray="8 4"/>
+    <circle r="22" fill="none" stroke="#6688ff" stroke-width="1" stroke-dasharray="4 6"/>
+  </g>
+  <!-- Pulsing orb center -->
+  <circle cx="50" cy="50" r="10" fill="url(#fireball2)">
+    <animate attributeName="r" values="10;14;10" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Orbiting particle -->
+  <circle r="4" fill="#88aaff">
+    <animateMotion dur="2s" repeatCount="indefinite"
+      path="M50,50 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0"/>
+  </circle>
+  <circle r="3" fill="#ffcc44">
+    <animateMotion dur="3s" repeatCount="indefinite" begin="-1s"
+      path="M50,50 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0"/>
+  </circle>
+</svg>
+<span style="color:#ffd700; margin-left:10px;">← Pure SVG SMIL: rotating rune circle, pulsing orb, orbiting particles</span>
+</div>
+
+<pre>
+/* ===== SVG SMIL ANIMATION EXAMPLES ===== */
+
+/* 1. Continuous rotation (magic circle, spin attack) */
+&lt;animateTransform attributeName="transform" type="rotate"
+  from="0 CX CY" to="360 CX CY"
+  dur="4s" repeatCount="indefinite"/&gt;
+
+/* 2. Pulsing scale / breathing */
+&lt;animateTransform attributeName="transform" type="scale"
+  values="1;1.05;1" dur="3s" repeatCount="indefinite"
+  additive="sum"/&gt;
+
+/* 3. Attribute animation (radius, opacity, color) */
+&lt;animate attributeName="r" values="10;15;10" dur="1.5s" repeatCount="indefinite"/&gt;
+&lt;animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/&gt;
+&lt;animate attributeName="fill" values="#ff0000;#ff8800;#ff0000" dur="0.5s" repeatCount="indefinite"/&gt;
+
+/* 4. Path motion (orbiting particle, patrol movement) */
+&lt;circle r="4" fill="#88aaff"&gt;
+  &lt;animateMotion dur="2s" repeatCount="indefinite"
+    path="M0,0 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0"/&gt;
+&lt;/circle&gt;
+
+/* 5. Chained animations (windup then attack) */
+&lt;animateTransform id="windup" attributeName="transform" type="rotate"
+  from="0" to="-40" dur="0.2s" begin="click" fill="freeze"/&gt;
+&lt;animateTransform attributeName="transform" type="rotate"
+  from="-40" to="60" dur="0.15s" begin="windup.end" fill="freeze"/&gt;
+&lt;animateTransform attributeName="transform" type="rotate"
+  from="60" to="0" dur="0.2s" begin="windup.end+0.15s" fill="freeze"/&gt;
+</pre>
+
+<h3>3c. Canvas requestAnimationFrame Sprite System</h3>
+<pre>
+/* ===== CANVAS SPRITE ANIMATION SYSTEM ===== */
+
+class Sprite {
+  constructor(drawFn, x, y, scale=1) {
+    this.draw = drawFn;   // function(ctx, state) — draws one frame
+    this.x = x; this.y = y; this.scale = scale;
+    this.state = 'idle';   // 'idle' | 'attack' | 'hurt' | 'dead'
+    this.frame = 0;
+    this.frameTimer = 0;
+    this.FRAMES_PER_TICK = 4;  // change to adjust speed
+  }
+
+  update(dt) {
+    this.frameTimer++;
+    if (this.frameTimer >= this.FRAMES_PER_TICK) {
+      this.frame++;
+      this.frameTimer = 0;
+    }
+    // State machine
+    if (this.state === 'attack' && this.frame > 8) {
+      this.state = 'idle'; this.frame = 0;
+    }
+    if (this.state === 'hurt' && this.frame > 4) {
+      this.state = 'idle'; this.frame = 0;
+    }
+  }
+
+  render(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.scale(this.scale, this.scale);
+    this.draw(ctx, { state: this.state, frame: this.frame });
+    ctx.restore();
+  }
+}
+
+/* Procedural draw function for a knight */
+function drawKnight(ctx, { state, frame }) {
+  const t = frame / 8;  // normalized time 0-1
+
+  /* Idle breathing */
+  const breathY = state === 'idle' ? Math.sin(frame * 0.3) * 1.5 : 0;
+
+  /* Attack swing angle */
+  let swordAngle = 0;
+  if (state === 'attack') {
+    if (frame < 3) swordAngle = -45 * (frame / 3);      // windup
+    else if (frame < 6) swordAngle = -45 + 110 * ((frame-3)/3); // swing
+    else swordAngle = 65 - 65 * ((frame-6)/2);          // return
+  }
+
+  /* Draw shadow */
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.scale(1, 0.3);
+  ctx.beginPath();
+  ctx.arc(0, 40, 18, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  /* Draw body (Y shifts with breathe) */
+  ctx.save();
+  ctx.translate(0, breathY);
+
+  /* Legs */
+  ctx.fillStyle = '#8aaabb';
+  ctx.fillRect(-12, 20, 9, 18);
+  ctx.fillRect(3, 20, 9, 18);
+  /* Boots */
+  ctx.fillStyle = '#334455';
+  ctx.fillRect(-13, 34, 11, 6);
+  ctx.fillRect(2, 34, 11, 6);
+
+  /* Body */
+  const grad = ctx.createLinearGradient(-14,0,14,0);
+  grad.addColorStop(0, '#c8d8e8');
+  grad.addColorStop(0.5, '#8aaabb');
+  grad.addColorStop(1, '#445566');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(-14, -10, 28, 30, 3);
+  ctx.fill();
+
+  /* Sword arm (rotating for attack) */
+  ctx.save();
+  ctx.translate(18, -5);
+  ctx.rotate(swordAngle * Math.PI / 180);
+  ctx.fillStyle = '#ddeeff';
+  ctx.fillRect(-2, -35, 4, 35);
+  ctx.fillStyle = '#cc9900';
+  ctx.fillRect(-6, -3, 12, 3);  // crossguard
+  ctx.restore();
+
+  /* Head / Helmet */
+  const hgrad = ctx.createLinearGradient(-12,-30,12,-30);
+  hgrad.addColorStop(0, '#c8d8e8');
+  hgrad.addColorStop(1, '#445566');
+  ctx.fillStyle = hgrad;
+  ctx.beginPath();
+  ctx.ellipse(0, -20, 12, 13, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  /* Visor */
+  ctx.fillStyle = '#334455';
+  ctx.beginPath();
+  ctx.ellipse(0, -16, 10, 6, 0, 0, Math.PI);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* Game loop */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const knight = new Sprite(drawKnight, 100, 100, 1.5);
+
+function loop(timestamp) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  knight.update(timestamp);
+  knight.render(ctx);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* Trigger attack on click */
+canvas.addEventListener('click', () => {
+  knight.state = 'attack';
+  knight.frame = 0;
+});
+</pre>
+
+</body>
+</html>

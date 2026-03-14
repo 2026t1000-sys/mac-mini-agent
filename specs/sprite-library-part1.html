@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HoMM3-Style Sprite Library - Part 1: SVG Units</title>
+<style>
+body { background: #1a1a2e; color: #e0e0e0; font-family: monospace; padding: 20px; }
+h1 { color: #ffd700; }
+h2 { color: #87ceeb; border-bottom: 1px solid #333; padding-bottom: 8px; }
+h3 { color: #90ee90; }
+.sprite-grid { display: flex; flex-wrap: wrap; gap: 30px; margin: 20px 0; }
+.sprite-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; min-width: 200px; }
+.sprite-card h4 { color: #ffd700; margin: 0 0 10px 0; text-align: center; }
+.sprite-display { background: #0d1b2a; border-radius: 4px; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 120px; }
+pre { background: #0a0a1a; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 11px; color: #a0d0a0; border: 1px solid #1a3a1a; max-height: 300px; }
+.note { background: #1a2a1a; border-left: 3px solid #ffd700; padding: 10px; margin: 10px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>HoMM3-Style Sprite Library — Complete SVG/Canvas Code Reference</h1>
+<p>All sprites are pure SVG/Canvas code, no external images. Embed directly into HTML game files.</p>
+
+<!-- ============================================================ -->
+<h2>1. CASTLE SWORDSMAN (Knight)</h2>
+<!-- ============================================================ -->
+<div class="note">Structure: helmet + visor + gorget + torso plate + pauldrons + arms + sword + shield + legs + boots. ~60 SVG elements for quality.</div>
+
+<div class="sprite-grid">
+<div class="sprite-card">
+  <h4>Castle Swordsman</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="120" viewBox="0 0 80 120">
+  <defs>
+    <!-- Steel armor gradient -->
+    <linearGradient id="steel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c8d8e8"/>
+      <stop offset="40%" style="stop-color:#8aaabb"/>
+      <stop offset="100%" style="stop-color:#445566"/>
+    </linearGradient>
+    <!-- Bright highlight -->
+    <linearGradient id="steelhi" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ddeeff;stop-opacity:0.9"/>
+      <stop offset="50%" style="stop-color:#aabbcc;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#334455;stop-opacity:0.8"/>
+    </linearGradient>
+    <!-- Shield gradient -->
+    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#cc2200"/>
+      <stop offset="100%" style="stop-color:#660000"/>
+    </linearGradient>
+    <!-- Skin -->
+    <radialGradient id="skin" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#f5c5a0"/>
+      <stop offset="100%" style="stop-color:#c8855a"/>
+    </radialGradient>
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- SHADOW -->
+  <ellipse cx="40" cy="116" rx="18" ry="4" fill="#000" opacity="0.4"/>
+
+  <!-- BOOTS -->
+  <rect x="27" y="98" width="10" height="14" rx="2" fill="url(#steel)"/>
+  <rect x="43" y="98" width="10" height="14" rx="2" fill="url(#steel)"/>
+  <rect x="26" y="108" width="12" height="4" rx="1" fill="#334455"/>
+  <rect x="42" y="108" width="12" height="4" rx="1" fill="#334455"/>
+
+  <!-- GREAVES (lower leg) -->
+  <rect x="28" y="85" width="9" height="14" rx="1" fill="url(#steelhi)"/>
+  <rect x="43" y="85" width="9" height="14" rx="1" fill="url(#steelhi)"/>
+  <!-- Greave ridges -->
+  <line x1="32" y1="86" x2="32" y2="98" stroke="#aabbcc" stroke-width="1" opacity="0.6"/>
+  <line x1="47" y1="86" x2="47" y2="98" stroke="#aabbcc" stroke-width="1" opacity="0.6"/>
+
+  <!-- TASSETS (hip plates) -->
+  <polygon points="25,83 35,83 33,92 23,90" fill="url(#steel)"/>
+  <polygon points="45,83 55,83 57,90 47,92" fill="url(#steel)"/>
+
+  <!-- TORSO / BREASTPLATE -->
+  <rect x="26" y="55" width="28" height="30" rx="3" fill="url(#steel)"/>
+  <!-- Breastplate center ridge -->
+  <line x1="40" y1="56" x2="40" y2="84" stroke="#ddeeff" stroke-width="1.5" opacity="0.7"/>
+  <!-- Breastplate highlight -->
+  <ellipse cx="36" cy="65" rx="5" ry="8" fill="white" opacity="0.12"/>
+  <!-- Belt -->
+  <rect x="26" y="80" width="28" height="5" rx="1" fill="#556677"/>
+  <rect x="38" y="80" width="4" height="5" fill="#ffd700"/>
+
+  <!-- PAULDRONS (shoulder plates) -->
+  <ellipse cx="24" cy="58" rx="8" ry="6" fill="url(#steel)"/>
+  <ellipse cx="56" cy="58" rx="8" ry="6" fill="url(#steel)"/>
+  <!-- Pauldron ridges -->
+  <path d="M17,56 Q24,50 31,56" stroke="#ddeeff" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M49,56 Q56,50 63,56" stroke="#ddeeff" stroke-width="1" fill="none" opacity="0.6"/>
+
+  <!-- LEFT ARM (shield side) -->
+  <rect x="14" y="60" width="9" height="22" rx="3" fill="url(#steel)"/>
+  <!-- Couter (elbow) -->
+  <ellipse cx="18" cy="72" rx="6" ry="4" fill="url(#steelhi)"/>
+  <!-- Vambrace -->
+  <rect x="15" y="74" width="8" height="12" rx="2" fill="url(#steelhi)"/>
+
+  <!-- SHIELD -->
+  <path d="M5,64 L20,64 L20,86 L12,96 L5,86 Z" fill="url(#shield)"/>
+  <!-- Shield rim -->
+  <path d="M5,64 L20,64 L20,86 L12,96 L5,86 Z" fill="none" stroke="#ffd700" stroke-width="1.5"/>
+  <!-- Shield boss (center knob) -->
+  <circle cx="12" cy="78" r="5" fill="#cc9900"/>
+  <circle cx="12" cy="78" r="3" fill="#ffcc00"/>
+  <circle cx="11" cy="77" r="1" fill="white" opacity="0.6"/>
+  <!-- Shield cross emblem -->
+  <line x1="12" y1="66" x2="12" y2="76" stroke="#ffd700" stroke-width="1"/>
+  <line x1="7" y1="72" x2="17" y2="72" stroke="#ffd700" stroke-width="1"/>
+
+  <!-- RIGHT ARM (sword side) -->
+  <rect x="57" y="60" width="9" height="22" rx="3" fill="url(#steel)"/>
+  <ellipse cx="62" cy="72" rx="6" ry="4" fill="url(#steelhi)"/>
+  <rect x="57" y="74" width="8" height="12" rx="2" fill="url(#steelhi)"/>
+
+  <!-- SWORD -->
+  <!-- Grip -->
+  <rect x="63" y="60" width="5" height="14" rx="2" fill="#8B4513"/>
+  <!-- Crossguard -->
+  <rect x="58" y="72" width="15" height="3" rx="1" fill="#cc9900"/>
+  <!-- Blade -->
+  <polygon points="65,18 67,72 63,72" fill="#ddeeff"/>
+  <polygon points="65,18 67,72 65,72" fill="white" opacity="0.5"/>
+  <!-- Pommel -->
+  <circle cx="65" cy="74" r="3" fill="#cc9900"/>
+
+  <!-- GORGET (neck armor) -->
+  <rect x="32" y="48" width="16" height="8" rx="2" fill="url(#steelhi)"/>
+
+  <!-- HEAD / HELMET -->
+  <!-- Skull of helmet -->
+  <ellipse cx="40" cy="36" rx="13" ry="14" fill="url(#steel)"/>
+  <!-- Visor -->
+  <path d="M29,38 Q40,44 51,38 L51,46 Q40,52 29,46 Z" fill="#334455"/>
+  <!-- Visor slots -->
+  <rect x="31" y="40" width="8" height="2" rx="1" fill="#111" opacity="0.8"/>
+  <rect x="41" y="40" width="8" height="2" rx="1" fill="#111" opacity="0.8"/>
+  <rect x="31" y="43" width="8" height="2" rx="1" fill="#111" opacity="0.8"/>
+  <rect x="41" y="43" width="8" height="2" rx="1" fill="#111" opacity="0.8"/>
+  <!-- Helmet ridge (comb) -->
+  <path d="M34,23 Q40,18 46,23 L46,36 Q40,32 34,36 Z" fill="url(#steelhi)"/>
+  <!-- Plume -->
+  <path d="M40,22 Q36,10 38,4 Q40,8 40,12 Q42,6 44,2 Q44,8 42,14" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round"/>
+  <path d="M40,22 Q37,12 39,6" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round"/>
+  <!-- Cheek guards -->
+  <path d="M29,38 Q26,44 28,50 L32,50 Q31,46 31,40" fill="url(#steel)"/>
+  <path d="M51,38 Q54,44 52,50 L48,50 Q49,46 49,40" fill="url(#steel)"/>
+  <!-- Helmet highlights -->
+  <ellipse cx="36" cy="28" rx="4" ry="6" fill="white" opacity="0.15"/>
+</svg>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ARCHER -->
+<!-- ============================================================ -->
+<div class="sprite-card">
+  <h4>Archer</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="120" viewBox="0 0 80 120">
+  <defs>
+    <linearGradient id="leather" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6914"/>
+      <stop offset="60%" style="stop-color:#6B4F10"/>
+      <stop offset="100%" style="stop-color:#3d2a05"/>
+    </linearGradient>
+    <linearGradient id="leatherhi" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#b8892a"/>
+      <stop offset="100%" style="stop-color:#5a3d0a"/>
+    </linearGradient>
+    <radialGradient id="skin2" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#f5c5a0"/>
+      <stop offset="100%" style="stop-color:#c8855a"/>
+    </radialGradient>
+    <linearGradient id="bowwood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B4513"/>
+      <stop offset="50%" style="stop-color:#c8722a"/>
+      <stop offset="100%" style="stop-color:#8B4513"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="40" cy="116" rx="16" ry="4" fill="#000" opacity="0.35"/>
+
+  <!-- Boots -->
+  <rect x="28" y="98" width="9" height="14" rx="2" fill="#5a3a10"/>
+  <rect x="43" y="98" width="9" height="14" rx="2" fill="#5a3a10"/>
+  <rect x="27" y="107" width="11" height="5" rx="1" fill="#3a2208"/>
+  <rect x="42" y="107" width="11" height="5" rx="1" fill="#3a2208"/>
+
+  <!-- Legs (hose) -->
+  <rect x="29" y="82" width="9" height="18" rx="2" fill="#2a3a5a"/>
+  <rect x="42" y="82" width="9" height="18" rx="2" fill="#2a3a5a"/>
+
+  <!-- Tunic/Gambeson body -->
+  <rect x="25" y="52" width="30" height="32" rx="4" fill="url(#leather)"/>
+  <!-- Tunic lacing -->
+  <line x1="40" y1="53" x2="40" y2="82" stroke="#ffd700" stroke-width="1" opacity="0.5"/>
+  <circle cx="40" cy="57" r="1.5" fill="#ffd700" opacity="0.7"/>
+  <circle cx="40" cy="63" r="1.5" fill="#ffd700" opacity="0.7"/>
+  <circle cx="40" cy="69" r="1.5" fill="#ffd700" opacity="0.7"/>
+  <!-- Belt -->
+  <rect x="25" y="78" width="30" height="4" rx="1" fill="#3d2a05"/>
+  <!-- Quiver (on back, peeking right) -->
+  <rect x="53" y="50" width="7" height="25" rx="3" fill="#5a3a10"/>
+  <rect x="53" y="48" width="7" height="5" rx="2" fill="#3a2208"/>
+  <!-- Arrow fletching in quiver -->
+  <line x1="55" y1="48" x2="55" y2="40" stroke="#8B4513" stroke-width="1.5"/>
+  <line x1="57" y1="48" x2="57" y2="38" stroke="#8B4513" stroke-width="1.5"/>
+  <line x1="59" y1="48" x2="59" y2="41" stroke="#8B4513" stroke-width="1.5"/>
+  <polygon points="55,40 53,44 57,44" fill="#cc2200"/>
+  <polygon points="57,38 55,42 59,42" fill="#cc6600"/>
+  <polygon points="59,41 57,45 61,45" fill="#cc2200"/>
+
+  <!-- Right shoulder pad -->
+  <ellipse cx="55" cy="55" rx="8" ry="5" fill="url(#leather)"/>
+
+  <!-- Left arm (bow arm, extended forward) -->
+  <rect x="14" y="56" width="9" height="20" rx="3" fill="url(#leather)"/>
+  <rect x="13" y="74" width="8" height="10" rx="2" fill="url(#leatherhi)"/>
+  <!-- Bracer on left wrist -->
+  <rect x="13" y="78" width="9" height="6" rx="1" fill="#5a3a10" stroke="#ffd700" stroke-width="0.5"/>
+
+  <!-- Right arm (drawing bow) -->
+  <rect x="57" y="56" width="9" height="18" rx="3" fill="url(#leather)"/>
+
+  <!-- BOW -->
+  <!-- Bow limbs (curved) -->
+  <path d="M16,44 Q6,68 16,92" stroke="url(#bowwood)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Bow string -->
+  <line x1="16" y1="44" x2="16" y2="92" stroke="#e8e0c8" stroke-width="1"/>
+  <!-- Arrow nocked -->
+  <line x1="16" y1="68" x2="58" y2="64" stroke="#8B4513" stroke-width="2"/>
+  <polygon points="16,68 18,65 18,71" fill="#cccccc"/>
+  <polygon points="56,64 58,62 60,66" fill="#aaa"/>
+  <!-- Arrow fletching -->
+  <path d="M52,65 L56,60 L56,64" fill="#cc2200"/>
+  <path d="M52,65 L56,68 L56,64" fill="#cc6600"/>
+
+  <!-- Neck -->
+  <rect x="36" y="46" width="8" height="8" rx="2" fill="url(#skin2)"/>
+
+  <!-- Head -->
+  <ellipse cx="40" cy="35" rx="12" ry="13" fill="url(#skin2)"/>
+  <!-- Hair -->
+  <path d="M28,32 Q29,22 40,20 Q51,22 52,32 L52,28 Q50,17 40,16 Q30,17 28,28 Z" fill="#3d2a05"/>
+  <!-- Eyes -->
+  <ellipse cx="35" cy="33" rx="2.5" ry="2" fill="white"/>
+  <ellipse cx="45" cy="33" rx="2.5" ry="2" fill="white"/>
+  <circle cx="35" cy="33" r="1.5" fill="#3d2a05"/>
+  <circle cx="45" cy="33" r="1.5" fill="#3d2a05"/>
+  <circle cx="35.5" cy="32.5" r="0.5" fill="white"/>
+  <circle cx="45.5" cy="32.5" r="0.5" fill="white"/>
+  <!-- Nose -->
+  <path d="M39,36 Q40,39 41,36" stroke="#c8855a" stroke-width="1" fill="none"/>
+  <!-- Mouth (determined expression) -->
+  <path d="M36,41 Q40,40 44,41" stroke="#9a5a3a" stroke-width="1" fill="none"/>
+  <!-- Hood/cap -->
+  <path d="M28,28 Q28,18 40,16 Q52,18 52,28 L50,24 Q48,15 40,14 Q32,15 30,24 Z" fill="#2a4a2a"/>
+  <!-- Feather in cap -->
+  <path d="M50,20 Q58,12 55,8 Q52,14 50,20" fill="#ccccaa" stroke="#aaa" stroke-width="0.5"/>
+</svg>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- WIZARD -->
+<!-- ============================================================ -->
+<div class="sprite-card">
+  <h4>Wizard / Mage</h4>
+  <div class="sprite-display">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="120" viewBox="0 0 80 120">
+  <defs>
+    <linearGradient id="robe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a1a6a"/>
+      <stop offset="50%" style="stop-color:#220d4a"/>
+      <stop offset="100%" style="stop-color:#120530"/>
+    </linearGradient>
+    <linearGradient id="robehi" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6a3aaa;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#1a0a3a;stop-opacity:0.8"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" style="stop-color:#aaddff"/>
+      <stop offset="40%" style="stop-color:#4488cc"/>
+      <stop offset="100%" style="stop-color:#001144"/>
+    </radialGradient>
+    <radialGradient id="skin3" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#e8c8b0"/>
+      <stop offset="100%" style="stop-color:#b8886a"/>
+    </radialGradient>
+    <filter id="magic">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.3  0 0 0 0 0.6  0 0 0 0 1  0 0 0 0.8 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="magiccircle" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#88aaff;stop-opacity:0.8"/>
+      <stop offset="70%" style="stop-color:#4466cc;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#2233aa;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Magic circle on ground -->
+  <ellipse cx="40" cy="114" rx="22" ry="7" fill="url(#magiccircle)"/>
+  <ellipse cx="40" cy="114" rx="22" ry="7" fill="none" stroke="#4466ff" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="40" cy="114" rx="15" ry="5" fill="none" stroke="#6688ff" stroke-width="0.5" opacity="0.4"/>
+  <ellipse cx="40" cy="113" rx="4" ry="2" fill="#88aaff" opacity="0.5"/>
+
+  <!-- Robe (wide, flowing) -->
+  <path d="M22,58 Q18,75 15,112 L65,112 Q62,75 58,58 Z" fill="url(#robe)"/>
+  <!-- Robe highlight left fold -->
+  <path d="M28,60 Q26,80 24,110" stroke="#6a3aaa" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Robe highlight right fold -->
+  <path d="M52,60 Q54,80 56,110" stroke="#6a3aaa" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Robe trim (gold) -->
+  <path d="M15,112 L65,112" stroke="#ffd700" stroke-width="2"/>
+  <path d="M22,58 L58,58" stroke="#ffd700" stroke-width="1.5" opacity="0.6"/>
+  <!-- Robe emblem (star) -->
+  <polygon points="40,72 42,78 48,78 43,82 45,88 40,84 35,88 37,82 32,78 38,78" fill="#ffd700" opacity="0.7"/>
+
+  <!-- Belt with buckle -->
+  <rect x="26" y="74" width="28" height="5" rx="1" fill="#5a3a10"/>
+  <rect x="37" y="73" width="6" height="7" rx="1" fill="#cc9900"/>
+  <circle cx="40" cy="76" r="2" fill="#ffdd55"/>
+
+  <!-- Left arm/sleeve -->
+  <path d="M22,58 Q14,65 10,80 L16,82 Q20,70 26,65" fill="url(#robe)" stroke="#3a1a6a" stroke-width="0.5"/>
+
+  <!-- Right arm/sleeve (raised, holding staff) -->
+  <path d="M58,58 Q65,62 68,55 L62,52 Q60,58 55,62" fill="url(#robe)" stroke="#3a1a6a" stroke-width="0.5"/>
+
+  <!-- STAFF -->
+  <!-- Staff shaft -->
+  <rect x="65" y="20" width="5" height="90" rx="2" fill="#5a3a10"/>
+  <line x1="67" y1="20" x2="67" y2="110" stroke="#8B6520" stroke-width="1" opacity="0.7"/>
+  <!-- Staff top ornament -->
+  <path d="M60,18 Q67,8 74,18 Q74,26 67,22 Q60,26 60,18" fill="#cc9900" stroke="#ffd700" stroke-width="1"/>
+  <!-- Orb atop staff -->
+  <circle cx="67" cy="16" r="8" fill="url(#orb)" filter="url(#magic)"/>
+  <circle cx="64" cy="13" r="2.5" fill="white" opacity="0.4"/>
+  <!-- Orb sparkles -->
+  <circle cx="67" cy="16" r="8" fill="none" stroke="#88ccff" stroke-width="0.5" opacity="0.8"/>
+  <!-- Magic sparks -->
+  <line x1="67" y1="8" x2="65" y2="4" stroke="#88ccff" stroke-width="1" opacity="0.8"/>
+  <line x1="74" y1="13" x2="78" y2="11" stroke="#88ccff" stroke-width="1" opacity="0.8"/>
+  <line x1="72" y1="22" x2="76" y2="25" stroke="#aaddff" stroke-width="1" opacity="0.6"/>
+  <circle cx="65" cy="3" r="1.5" fill="#aaddff" opacity="0.9"/>
+  <circle cx="79" cy="10" r="1" fill="#88ccff" opacity="0.8"/>
+
+  <!-- Torso/chest under robe -->
+  <rect x="28" y="50" width="24" height="10" rx="2" fill="url(#robehi)"/>
+
+  <!-- BEARD (long white) -->
+  <path d="M31,50 Q28,62 29,76 Q34,80 40,78 Q46,80 51,76 Q52,62 49,50" fill="white" opacity="0.85"/>
+  <!-- Beard texture lines -->
+  <path d="M34,52 Q33,63 34,72" stroke="#ddd" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M38,52 Q37,64 38,74" stroke="#ddd" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M42,52 Q43,64 42,74" stroke="#ddd" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M46,52 Q47,63 46,72" stroke="#ddd" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+  <!-- Head -->
+  <ellipse cx="40" cy="36" rx="11" ry="12" fill="url(#skin3)"/>
+  <!-- Wrinkles -->
+  <path d="M32,34 Q35,32 38,34" stroke="#b8886a" stroke-width="0.8" fill="none" opacity="0.6"/>
+  <path d="M42,34 Q45,32 48,34" stroke="#b8886a" stroke-width="0.8" fill="none" opacity="0.6"/>
+  <!-- Eyes (glowing, wise) -->
+  <ellipse cx="35" cy="35" rx="2.5" ry="2" fill="white"/>
+  <ellipse cx="45" cy="35" rx="2.5" ry="2" fill="white"/>
+  <circle cx="35" cy="35" r="1.8" fill="#3366aa"/>
+  <circle cx="45" cy="35" r="1.8" fill="#3366aa"/>
+  <circle cx="35.6" cy="34.4" r="0.5" fill="white"/>
+  <circle cx="45.6" cy="34.4" r="0.5" fill="white"/>
+  <!-- Eye glow -->
+  <circle cx="35" cy="35" r="2.5" fill="none" stroke="#88aaff" stroke-width="0.5" opacity="0.6" filter="url(#magic)"/>
+  <circle cx="45" cy="35" r="2.5" fill="none" stroke="#88aaff" stroke-width="0.5" opacity="0.6"/>
+  <!-- Eyebrows (bushy white) -->
+  <path d="M32,31 Q35,29 38,31" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M42,31 Q45,29 48,31" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Nose (large, distinctive) -->
+  <path d="M39,38 Q37,43 39,44 Q41,44 43,43 Q45,43 43,38" stroke="#b8886a" stroke-width="1" fill="#d8a880" opacity="0.7"/>
+
+  <!-- WIZARD HAT -->
+  <!-- Brim -->
+  <ellipse cx="40" cy="24" rx="16" ry="4" fill="#220d4a" stroke="#6a3aaa" stroke-width="1"/>
+  <!-- Cone -->
+  <path d="M24,24 Q40,2 56,24" fill="#3a1a6a" stroke="#6a3aaa" stroke-width="1"/>
+  <!-- Hat star -->
+  <polygon points="40,8 41,12 45,12 42,14 43,18 40,16 37,18 38,14 35,12 39,12" fill="#ffd700" opacity="0.8"/>
+  <!-- Hat highlight -->
+  <path d="M36,22 Q38,10 40,6" stroke="#6a3aaa" stroke-width="1.5" fill="none" opacity="0.6"/>
+</svg>
+
+  </div>
+</div>
+</div><!-- end sprite-grid -->
+
+<pre>
+/* ===== HOW TO USE THESE SPRITES ===== */
+/* Each sprite is a self-contained &lt;svg&gt; element.
+   Embed directly in HTML. Scale with width/height attributes.
+   Key techniques used:
+   1. linearGradient / radialGradient in &lt;defs&gt; for shading
+   2. &lt;polygon&gt; and &lt;path&gt; for armor plates and complex shapes
+   3. &lt;filter&gt; with feGaussianBlur + feMerge for glow effects
+   4. Layering order: shadow → feet → legs → body → arms → weapons → head
+   5. Highlight ellipses (white, low opacity) for metallic sheen
+*/
+</pre>
+
+</body>
+</html>

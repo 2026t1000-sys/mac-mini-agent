@@ -1,0 +1,913 @@
+# HoMM3 Browser Clone - Definitive Technical Requirements
+# Generated from: official wikis, VCMI modding docs, community research
+# Purpose: AI prompt engineering reference for high-quality implementation
+# Date: 2026-03-14
+
+meta:
+  game: "Heroes of Might and Magic III: The Restoration of Erathia (1999)"
+  base_resolution: "800x600 pixels (original); HD mod targets 1024x600 to 1920x1080"
+  engine_type: "Turn-based strategy with hexagonal combat"
+  reference_implementations:
+    - url: "https://github.com/HeroWO-js/Core"
+      description: "Most complete JS reimplementation - full map, combat, spells, multiplayer"
+    - url: "https://github.com/xorinzor/HOMM3"
+      description: "MelonJS-based browser remake"
+    - url: "https://github.com/mwardrop/HOMM3Clone"
+      description: "HTML5 Canvas clone with A* pathfinding, websockets, collision"
+    - url: "https://github.com/Hydraaaaa/HoMM3ServerAuthoritative"
+      description: "Server-authoritative browser multiplayer remake"
+    - url: "https://github.com/srg-kostyrko/homm3-parser"
+      description: "Binary resource parser (.h3m files, DEF animations)"
+
+# ============================================================
+# SECTION 1: COMBAT SCREEN VISUAL LAYOUT
+# ============================================================
+
+combat_screen:
+  total_resolution: "800x600 px"
+
+  battlefield:
+    grid_type: "hexagonal offset grid"
+    columns: 15
+    rows: 11
+    total_hexes: 165
+    hex_orientation: "flat-top (pointy sides up)"
+    # Each hex is roughly 44px wide x 38px tall at 800x600
+    approximate_hex_width_px: 44
+    approximate_hex_height_px: 38
+    battlefield_area_px: "593 x 417 (approximate, leaving room for UI panels)"
+
+  ui_panels:
+    right_panel:
+      position: "far right, full height"
+      width_px: ~200
+      contents:
+        - "Attacker hero portrait (top left quadrant)"
+        - "Defender hero portrait (top right quadrant)"
+        - "7 creature stack slots per hero (attacker left, defender right)"
+        - "Each stack slot: creature icon + count number"
+        - "WAIT button"
+        - "DEFEND button"
+        - "Auto-combat toggle"
+        - "Spell book button"
+        - "End combat / Surrender / Flee buttons"
+
+    bottom_panel:
+      position: "bottom strip"
+      height_px: ~70
+      contents:
+        - "Combat log scrollable text (center)"
+        - "Combat options icon (bottom left)"
+        - "Hero spell point bar (mana bar)"
+        - "Current unit name + count display"
+
+    combat_log:
+      position: "bottom center"
+      type: "scrolling text box"
+      shows: "damage dealt, spells cast, morale events, kills"
+
+  terrain_backgrounds:
+    # Each terrain type has a distinct painted background artwork
+    types:
+      grass:
+        description: "Rolling green hills, trees, flowers, ruins"
+        native_factions: ["Castle", "Rampart", "Conflux"]
+      dirt:
+        description: "Brown earth, dead trees, fences, graves"
+        native_factions: ["Necropolis"]
+      lava:
+        description: "Volcanic rock, flowing orange lava rivers, ash"
+        native_factions: ["Inferno"]
+      snow:
+        description: "White snowfields, pine trees, frozen ground, rocks"
+        native_factions: ["Tower", "Fortress (partial)"]
+      subterranean:
+        description: "Underground cave floor, stalactites, rock walls, dim light"
+        native_factions: ["Dungeon (partial)"]
+      rough:
+        description: "Rocky highland wasteland, sparse vegetation"
+        native_factions: ["Stronghold"]
+      sand:
+        description: "Desert sand dunes, scattered rocks, sparse palms"
+        native_factions: ["none default"]
+      swamp:
+        description: "Murky green water, lily pads, mossy ground, fog"
+        native_factions: ["Fortress", "Cove"]
+
+    native_terrain_bonus:
+      attack: +1
+      defense: +1
+      speed: +1
+      note: "Applies when creature fights on its faction's native terrain"
+
+  siege_combat_additions:
+    enabled_when: "attacking a town with Fort/Citadel/Castle built"
+    elements:
+      - "Castle walls (destructible with Earthquake spell or Catapult)"
+      - "Gate (blocks hex, can be destroyed)"
+      - "Arrow towers (shoot automatically each round)"
+      - "Moat (creatures entering stop for 1 round, take damage)"
+      - "Catapult (attacker war machine, targets walls)"
+
+# ============================================================
+# SECTION 2: VISUAL QUALITY - WHAT SEPARATES HoMM3 FROM CHEAP CLONES
+# ============================================================
+
+visual_quality:
+
+  sprite_rendering_approach:
+    technique: "Pre-rendered 3D models baked to 2D sprites (not hand-drawn pixel art)"
+    result: "Smooth shading, realistic proportions, subtle 3D depth"
+    format: "DEF files (proprietary animation container)"
+    palette: "256 RGBA colors per DEF file"
+
+  creature_animation_system:
+    # VCMI animation group IDs (authoritative reference)
+    animation_groups:
+      0:  {name: "Movement",          frames_typical: "8-16"}
+      1:  {name: "Mouse Over / Idle", frames_typical: "4-8"}
+      2:  {name: "Idle loop",         frames_typical: "4-8"}
+      3:  {name: "Hit (being struck)", frames_typical: "3-6"}
+      4:  {name: "Defend / Block",    frames_typical: "3-6"}
+      5:  {name: "Death (melee)",     frames_typical: "8-12"}
+      6:  {name: "Death (ranged)",    frames_typical: "8-12"}
+      7:  {name: "Turn Left",         frames_typical: "3-5"}
+      8:  {name: "Turn Right",        frames_typical: "3-5"}
+      11: {name: "Attack Up-Diagonal",    frames_typical: "6-10"}
+      12: {name: "Attack Straight",       frames_typical: "6-10"}
+      13: {name: "Attack Down-Diagonal",  frames_typical: "6-10"}
+      14: {name: "Shoot Up-Diagonal",     frames_typical: "6-10"}
+      15: {name: "Shoot Straight",        frames_typical: "6-10"}
+      16: {name: "Shoot Down-Diagonal",   frames_typical: "6-10"}
+      17: {name: "Special Attack Up",     frames_typical: "6-12"}
+      18: {name: "Special Attack Front",  frames_typical: "6-12"}
+      19: {name: "Special Attack Down",   frames_typical: "6-12"}
+      20: {name: "Movement Start",    frames_typical: "3-5"}
+      21: {name: "Movement End",      frames_typical: "3-5"}
+      22: {name: "Dead (persistent)", frames_typical: "1"}
+      24: {name: "Resurrection",      frames_typical: "8-12"}
+      30: {name: "Spellcast Up",      frames_typical: "6-10"}
+      31: {name: "Spellcast Front",   frames_typical: "6-10"}
+      32: {name: "Spellcast Down",    frames_typical: "6-10"}
+
+    notes: "Total animation frames per creature: typically 60-120 frames across all groups"
+    idle_behavior: "Creatures constantly cycle through idle animation (breathing, shifting weight)"
+
+  creature_sprite_requirements:
+    minimum_quality:
+      - "Smooth multi-directional animations (up, front, down attack angles)"
+      - "Death animation that ends in a corpse frame (not disappear)"
+      - "Walking animation that synchronizes with hex movement speed"
+      - "Hit flash effect (sprite briefly lights up white/red on damage)"
+      - "2-hex creatures (Dragons, etc.) occupy two hexes on grid"
+    quality_markers_that_separate_from_cheap:
+      - "Idle breathing cycle animation (not static standing)"
+      - "Distinct attack animations for different directions (up/straight/down)"
+      - "Corpse sprites remain on field until combat ends"
+      - "Large creatures have proportionally large sprites with visible detail"
+      - "Projectile sprites for ranged units (arrows, bolts, magic missiles)"
+
+  spell_effects:
+    visual_style: "Large painted overlay effects, particle burst animations"
+    key_effects:
+      lightning_bolt: "Jagged white/yellow bolt from sky to target hex"
+      fireball: "Orange explosion covering 7 hexes, scorch ring"
+      armageddon: "Full screen red flame wash over entire battlefield"
+      ice_bolt: "Blue ice crystal shard projectile + blue explosion"
+      meteor_shower: "Multiple rocks falling with impact craters"
+      animate_dead: "Green necromantic glow around resurrected creatures"
+      resurrection: "Golden angelic light from above"
+      chain_lightning: "Lightning jumps visibly between up to 5 targets"
+      bless: "Golden aura appearing around creature"
+      slow: "Blue-grey veil settling over creature (slowed appearance)"
+      haste: "Green speed-lines/blur around creature"
+      blind: "Dark veil / grey-out effect over creature"
+      berserk: "Red rage aura / flames around creature"
+
+    quality_requirement: "Effects must visually overlap the battlefield art and animate for 0.5-1.5 seconds"
+
+  damage_numbers:
+    style: "Floating text appearing above struck creature"
+    color: "Yellow or white numbers, red for large damage"
+    animation: "Rise upward and fade over ~1 second"
+    content: "Shows exact damage value dealt"
+    additional_indicators:
+      lucky_strike: "Floating golden star or 'LUCK!' text"
+      morale_bonus: "Flags/icon animation + extra turn indicator"
+      miss_blocked: "Not applicable (HoMM3 never misses, always deals damage)"
+
+  hex_highlighting:
+    hover: "Subtle outline glow on hovered hex"
+    reachable_hexes: "Dark blue/teal overlay showing movement range"
+    attack_target: "Red outline on targetable enemy hexes"
+    ranged_no_penalty: "Bright highlight for within-range targets"
+    ranged_penalty: "Dimmer highlight for long-range (50% damage) targets"
+
+  hero_portrait:
+    style: "Painted fantasy portrait, roughly 58x64 pixels in combat panel"
+    detail_level: "High detail oil-painting style faces, armor, class-appropriate costume"
+    animation: "Static portrait (not animated)"
+    spell_cast_visual: "Hero portrait briefly lit up / sparkle when casting"
+
+# ============================================================
+# SECTION 3: GAME MECHANICS - EXACT NUMBERS
+# ============================================================
+
+combat_mechanics:
+
+  turn_order:
+    system: "Speed-based initiative (higher speed acts first)"
+    phases_per_round:
+      1: "Initial phase: all creatures by speed descending, attacker first in ties"
+      2: "Morale/Wait phase: good morale extra actions + waited creatures in reverse speed order"
+    speed_tiebreaking:
+      same_faction: "Unit in lower army slot goes first"
+      opposite_factions: "Side that has not had the most recent action goes first"
+      first_round: "Attacker's creatures break ties"
+    wait_mechanic: "Unit can forfeit current turn to act later (reverse speed order)"
+    defend_mechanic: "Unit increases defense by 20% for the round, cannot act otherwise"
+
+  damage_formula:
+    base_calculation: |
+      If stack_size <= 10:
+        DMG_base = SUM of individual random rolls in [min_dmg, max_dmg] per creature
+      Else:
+        DMG_base = SUM of 10 random rolls × (stack_size / 10), rounded down
+
+    attack_defense_modifier:
+      positive_add: "Each point attacker_ATK > defender_DEF = +5% damage (max +300% at ADD=+60)"
+      negative_add: "Each point defender_DEF > attacker_ATK = -2.5% damage (max -70% at ADD=-28)"
+
+    full_formula: |
+      DMG_final = DMG_base
+        × (1 + I1[ATK bonus] + I2[skill bonus] + I3[specialty] + I4[luck] + I5[abilities])
+        × (1 - R1[DEF penalty])
+        × (1 - R2[Armorer] - R3[specialty])
+        × (1 - R4[Shield spell])
+        × (1 - R5[range penalty])
+        × (1 - R6[wall obstacle])
+        × (1 - R7[Blind retaliation])
+        × (1 - R8[Petrify/Paralyze])
+
+    hero_skill_modifiers:
+      offense_skill: "+10%/+20%/+30% base damage (basic/advanced/expert)"
+      armorer_skill: "-5%/-10%/-15% incoming damage"
+      archery_skill: "+10%/+25%/+50% ranged damage"
+
+    range_penalty:
+      short_range: "No penalty (< 10 hexes)"
+      long_range: "-50% damage (10+ hexes distance)"
+      melee_penalty: "-50% when ranged unit is adjacent to enemy (can still shoot)"
+
+  luck_system:
+    values: {"-3": "Cursed", "-2": "Awful", "-1": "Bad", "0": "Normal", "+1": "Good", "+2": "Great", "+3": "Irish"}
+    positive_luck_trigger_probability:
+      "+1": "4.17% (1/24)"
+      "+2": "8.33% (1/12)"
+      "+3": "12.5% (1/8)"
+    positive_luck_effect: "Deal exactly 2× total damage"
+    negative_luck_trigger_probability:
+      "-1": "8.33% (1/12)"
+      "-2": "16.67% (1/6)"
+      "-3": "25% (1/4)"
+    negative_luck_effect: "Deal 0.5× total damage (HotA only; SoD has no negative luck)"
+    immune_to_luck: ["Undead", "Golems", "Elementals"]
+
+  morale_system:
+    range: -3 to +3
+    positive_morale_trigger:
+      "+1": "4.17% (1/24)"
+      "+2": "8.33% (1/12)"
+      "+3": "12.5% (1/8)"
+    positive_morale_effect: "Unit gets an immediate second action after current action"
+    negative_morale_trigger:
+      "-1": "8.33% (1/12)"
+      "-2": "16.67% (1/6)"
+      "-3": "25% (1/4)"
+    negative_morale_effect: "Unit loses its turn (freezes in panic)"
+    timing:
+      positive: "Triggers AFTER the unit has acted"
+      negative: "Triggers AT THE START of the unit's turn"
+    immune_to_morale: ["Undead", "Golems", "Elementals"]
+    key_modifiers:
+      mixed_army_penalty: "-1 per alignment type mixed beyond 1"
+      undead_in_army: "-1 morale for all living units in same army"
+      leadership_basic: "+1 morale"
+      leadership_advanced: "+2 morale"
+      leadership_expert: "+3 morale"
+
+  retaliation_system:
+    default_retaliations_per_round: 1
+    exceptions:
+      griffin: 2
+      royal_griffin: "unlimited"
+      fangarm: "unlimited (HotA)"
+    counterstrike_spell_bonus: "+1 or +2 extra retaliations"
+    no_retaliation_creatures:
+      - Nagas
+      - Naga Queens
+      - Cerberi
+      - Devils
+      - Arch Devils
+      - Vampire Lords
+      - Harpy Hags
+      - Hydras
+      - Chaos Hydras
+      - Sprites
+      - Psychic Elementals
+      - Magic Elementals
+    no_retaliation_note: "Attacked stack does NOT consume a retaliation charge when struck by no-retaliation unit"
+    ranged_retaliation: "Ranged units do NOT retaliate against melee attacks by default"
+
+  ranged_combat:
+    obstacle_penalty: "-50% damage if wall or obstacle between shooter and target"
+    adjacent_enemy_penalty: "-50% damage if shooter is adjacent to any enemy"
+    minimum_penalty_when_both: "-50% (not stacked to -75%)"
+    no_range_minimum_distance: "1-9 hexes = no range penalty"
+    long_range_penalty_threshold: 10
+
+  flying_units:
+    movement: "Can cross any hex regardless of obstacles or enemy zones of control"
+    attack_retaliation: "Subject to normal retaliation unless unit has no-retaliation ability"
+    examples: "Angels, Griffins, Dragons, Harpy Hags, Pegasi, Air/Fire/Storm Elementals"
+
+  two_hex_creatures:
+    description: "Large creatures occupy 2 hexes on the battlefield"
+    examples: "Dragons, Cyclops, Behemoths, Hydras, Titans, Devils"
+    movement: "Must find 2 adjacent free hexes to stand on"
+
+# ============================================================
+# SECTION 4: SPELL SYSTEM
+# ============================================================
+
+spell_system:
+  mana_formula: "Max spell points = Knowledge × 10"
+  schools: ["Air Magic", "Earth Magic", "Fire Magic", "Water Magic"]
+  school_proficiency_levels: ["None (basic effect)", "Basic", "Advanced", "Expert"]
+  hero_spell_frequency: "One spell cast per round (can cast any time during allied creature's turn)"
+
+  complete_spell_list:
+    # Format: {school, level, sp_cost, effect_formula}
+
+    # --- DAMAGE SPELLS ---
+    magic_arrow:
+      school: "All Schools"
+      level: 1
+      sp_cost: "5 (4 with school mastery)"
+      damage: "10/20/30 + (power × 10)"
+      target: "single enemy"
+
+    lightning_bolt:
+      school: "Air"
+      level: 2
+      sp_cost: "10 (8 mastery)"
+      damage: "10/20/50 + (power × 25)"
+      target: "single enemy"
+
+    destroy_undead:
+      school: "Air"
+      level: 3
+      sp_cost: "15 (12 mastery)"
+      damage: "10/20/50 + (power × 10)"
+      target: "all undead enemies"
+
+    chain_lightning:
+      school: "Air"
+      level: 4
+      sp_cost: "24 (20 mastery)"
+      damage: "25/50/100 + (power × 40)"
+      target: "up to 5 enemy stacks (damage halves each jump)"
+
+    titans_lightning_bolt:
+      school: "Air"
+      level: 5
+      sp_cost: 0
+      damage: 600
+      target: "single enemy"
+      requirement: "Titan's Thunder artifact"
+
+    death_ripple:
+      school: "Earth"
+      level: 2
+      sp_cost: "10 (8 mastery)"
+      damage: "10/20/30 + (power × 5)"
+      target: "all living enemies"
+
+    meteor_shower:
+      school: "Earth"
+      level: 4
+      sp_cost: "16 (12 mastery)"
+      damage: "25/50/100 + (power × 25)"
+      target: "7-hex area"
+
+    implosion:
+      school: "Earth"
+      level: 5
+      sp_cost: "30 (25 mastery)"
+      damage: "100/200/300 + (power × 75)"
+      target: "single enemy"
+
+    fire_wall:
+      school: "Fire"
+      level: 2
+      sp_cost: "8 (6 mastery)"
+      damage: "10/20/50 + (power × 10)"
+      target: "2-hex wall obstacle (damages when walked through)"
+
+    fireball:
+      school: "Fire"
+      level: 3
+      sp_cost: "15 (12 mastery)"
+      damage: "15/30/60 + (power × 10)"
+      target: "7-hex explosion area"
+
+    land_mine:
+      school: "Fire"
+      level: 3
+      sp_cost: "18 (15 mastery)"
+      damage: "25/50/100 + (power × 10)"
+      target: "random hexes (triggered on walk)"
+
+    armageddon:
+      school: "Fire"
+      level: 4
+      sp_cost: "24 (20 mastery)"
+      damage: "30/60/120 + (power × 50)"
+      target: "ALL creatures on battlefield"
+
+    inferno:
+      school: "Fire"
+      level: 4
+      sp_cost: "16 (12 mastery)"
+      damage: "20/40/80 + (power × 10)"
+      target: "19-hex area"
+
+    ice_bolt:
+      school: "Water"
+      level: 2
+      sp_cost: "8 (6 mastery)"
+      damage: "10/20/50 + (power × 20)"
+      target: "single enemy"
+
+    frost_ring:
+      school: "Water"
+      level: 3
+      sp_cost: "12 (9 mastery)"
+      damage: "15/30/60 + (power × 10)"
+      target: "ring of 6 hexes (center excluded)"
+
+    # --- BUFF/DEBUFF SPELLS ---
+    haste: {school: "Air", level: 1, effect: "+3/+5 speed to friendly unit/all"}
+    slow: {school: "Earth", level: 1, effect: "-75%/-(50%+1) speed to enemy unit/all"}
+    bless: {school: "Water", level: 1, effect: "Forces max/(max+1) damage on attacks"}
+    curse: {school: "Fire", level: 1, effect: "Forces min/(min-1) damage on attacks"}
+    shield: {school: "Earth", level: 1, effect: "-15%/-30% melee damage received"}
+    stone_skin: {school: "Earth", level: 1, effect: "+3/+6 defense to friendly unit/all"}
+    bloodlust: {school: "Fire", level: 1, effect: "+3/+6 melee attack to friendly unit/all"}
+    prayer: {school: "Water", level: 4, effect: "+2/+4 attack + defense + speed to all friendlies"}
+    frenzy: {school: "Fire", level: 4, effect: "+100%/+150%/+200% of defense added to attack, defense becomes 0"}
+    berserk: {school: "Fire", level: 4, effect: "Enemy attacks nearest troop in 1/2/3 hex radius"}
+    blind: {school: "Fire", level: 2, effect: "Prevents action; retaliates at 50%/25%/0%"}
+    mirth: {school: "Water", level: 3, effect: "+1/+2 morale to all friendlies"}
+    sorrow: {school: "Earth", level: 4, effect: "-1/-2 morale to all enemies"}
+    fortune: {school: "Air", level: 2, effect: "+1/+2 luck to friendly unit/all"}
+    misfortune: {school: "Fire", level: 3, effect: "-1/-2 luck to enemy unit/all"}
+    weakness: {school: "Water", level: 2, effect: "-3/-6 attack to enemy unit/all"}
+    disrupting_ray: {school: "Air", level: 2, effect: "-3/-4/-5 defense to enemy (permanent until dispelled)"}
+    precision: {school: "Air", level: 2, effect: "+3/+6 ranged attack to friendly unit/all"}
+    air_shield: {school: "Air", level: 3, effect: "-25%/-50% ranged damage received"}
+    fire_shield: {school: "Fire", level: 4, effect: "Reflects 20%/25%/30% melee damage back to attacker"}
+    anti_magic: {school: "Earth", level: 3, effect: "Immunizes to spells level 3/4/5 and below"}
+    counterstrike: {school: "Air", level: 4, effect: "+1/+2 extra retaliations per round for all friendlies"}
+    slayer: {school: "Fire", level: 4, effect: "+8 attack vs behemoths/dragons/hydras/firebirds"}
+    hypnotize: {school: "Air", level: 3, effect: "Control enemy if HP <= 10/20/50 + (power × 25)"}
+    forgetfulness: {school: "Water", level: 3, effect: "Disables ranged attack (all targets at expert)"}
+    magic_mirror: {school: "Air", level: 5, effect: "20%/30%/40% spell reflection chance"}
+    clone: {school: "Water", level: 4, effect: "Duplicate friendly unit (up to lvl 5/6/7)"}
+    teleport: {school: "Water", level: 3, sp_cost: "15/12/6/3", effect: "Instantly move friendly unit to any hex"}
+    dispel: {school: "Water", level: 1, effect: "Remove spell effects (friendly/enemy/all)"}
+    cure: {school: "Water", level: 1, effect: "Remove negative effects + heal 10/20/30 + (power × 5) HP"}
+
+    # --- SUMMONING SPELLS ---
+    animate_dead: {school: "Earth", level: 3, effect: "Reanimate 30/60/160 + (power × 50) HP of undead"}
+    resurrection: {school: "Earth", level: 4, effect: "Reanimate 40/80/160 + (power × 50) HP living (temporary/permanent)"}
+    sacrifice: {school: "Fire", level: 5, effect: "Sacrifice friendly unit to permanently reanimate another"}
+    summon_fire_elemental: {school: "Fire", level: 5, effect: "Summon power × 2/3/4 Fire Elementals"}
+    summon_air_elemental: {school: "Air", level: 5, effect: "Summon power × 2/3/4 Air Elementals"}
+    summon_earth_elemental: {school: "Earth", level: 5, effect: "Summon power × 2/3/4 Earth Elementals"}
+    summon_water_elemental: {school: "Water", level: 5, effect: "Summon power × 2/3/4 Water Elementals"}
+
+    # --- ADVENTURE MAP SPELLS ---
+    view_earth: {school: "Earth", level: 1, sp_cost: "2 (1 mastery)", effect: "Show resources/mines on map"}
+    view_air: {school: "Air", level: 1, sp_cost: "2 (1 mastery)", effect: "Show artifacts/heroes/towns"}
+    summon_boat: {school: "Water", level: 1, sp_cost: "8 (7 mastery)", effect: "50%/75%/100% summon nearest boat"}
+    scuttle_boat: {school: "Water", level: 2, sp_cost: "8 (6 mastery)", effect: "50%/75%/100% destroy boat"}
+    visions: {school: "All", level: 2, sp_cost: "4 (2 mastery)", effect: "Reveal creature/hero/town info in range"}
+    disguise: {school: "Air", level: 2, sp_cost: "4 (2 mastery)", effect: "Hide hero army details"}
+    remove_obstacle: {school: "Water", level: 2, sp_cost: "7 (5 mastery)", effect: "Remove obstacles"}
+    earthquake: {school: "Earth", level: 3, sp_cost: "20 (17 mastery)", effect: "Damage 2/3/4 siege walls"}
+    force_field: {school: "Earth", level: 3, sp_cost: "12 (9 mastery)", effect: "Create 2/3-hex blocking wall"}
+    quicksand: {school: "Earth", level: 2, sp_cost: "8 (6 mastery)", effect: "Place 4/6/8 pit obstacles"}
+    water_walk: {school: "Water", level: 4, sp_cost: "12 (8 mastery)", effect: "Cross water with 40%/20%/0% penalty"}
+    town_portal: {school: "Earth", level: 4, sp_cost: "16 (12 mastery)", effect: "Teleport to nearest/any allied town"}
+    fly: {school: "Air", level: 5, sp_cost: "20 (15 mastery)", effect: "Fly over terrain with 40%/20%/0% movement penalty"}
+    dimension_door: {school: "Air", level: 5, sp_cost: "25 (20 mastery)", effect: "Teleport hero; 1/2/3/4 uses per day"}
+
+# ============================================================
+# SECTION 5: ALL 9 FACTIONS AND UNIT TIERS
+# ============================================================
+
+factions:
+  # Format per tier: [name, upgraded_name, atk, def, hp, speed, dmg_min-max, special]
+
+  castle:
+    theme: "Knights, humans, angels"
+    native_terrain: "grass"
+    tier_1: {base: "Pikeman", upgraded: "Halberdier", atk: 4, def: 5, hp: 10, speed: 4, dmg: "1-3"}
+    tier_2: {base: "Archer", upgraded: "Marksman", atk: 6, def: 3, hp: 10, speed: 5, dmg: "2-3", special: "Ranged; Marksman: 2 shots per turn"}
+    tier_3: {base: "Griffin", upgraded: "Royal Griffin", atk: 8, def: 8, hp: 25, speed: 9, dmg: "3-6", special: "Flying; 2 retaliations (Royal: unlimited)"}
+    tier_4: {base: "Swordsman", upgraded: "Crusader", atk: 10, def: 12, hp: 35, speed: 6, dmg: "6-9", special: "Crusader: 2 attacks per turn"}
+    tier_5: {base: "Monk", upgraded: "Zealot", atk: 12, def: 7, hp: 30, speed: 7, dmg: "6-10", special: "Ranged; Zealot: no melee penalty"}
+    tier_6: {base: "Cavalier", upgraded: "Champion", atk: 15, def: 15, hp: 100, speed: 9, dmg: "15-25", special: "Joust: +5% dmg per hex traveled"}
+    tier_7: {base: "Angel", upgraded: "Archangel", atk: 20, def: 20, hp: 200, speed: "12 (Angel) / 18 (Archangel)", dmg: "50-50", special: "Flying; Resurrect once; Hates Devils; +1 morale; Archangel: resurrects all"}
+
+  rampart:
+    theme: "Elves, dwarves, nature"
+    native_terrain: "grass"
+    tier_1: {base: "Centaur", upgraded: "Centaur Captain", atk: 5, def: 3, hp: 8, speed: 6, dmg: "2-3", special: "Ranged (limited)"}
+    tier_2: {base: "Dwarf", upgraded: "Battle Dwarf", atk: 6, def: 7, hp: 20, speed: 3, dmg: "2-4", special: "Battle Dwarf: 40% magic resistance"}
+    tier_3: {base: "Wood Elf", upgraded: "Grand Elf", atk: 9, def: 5, hp: 15, speed: 7, dmg: "3-5", special: "Ranged; 2 shots per turn"}
+    tier_4: {base: "Pegasus", upgraded: "Silver Pegasus", atk: 9, def: 8, hp: 40, speed: 11, dmg: "5-8", special: "Flying; +1 morale bonus"}
+    tier_5: {base: "Dendroid Guard", upgraded: "Dendroid Soldier", atk: 9, def: 12, hp: 55, speed: 3, dmg: "6-10", special: "Bind ability (roots adjacent enemy)"}
+    tier_6: {base: "Unicorn", upgraded: "War Unicorn", atk: 15, def: 15, hp: 95, speed: 9, dmg: "12-20", special: "Blinds on hit (20% chance); +3/+5 luck aura"}
+    tier_7: {base: "Green Dragon", upgraded: "Gold Dragon", atk: 23, def: 23, hp: 225, speed: "14 (Green) / 16 (Gold)", dmg: "35-50 (Green) / 40-50 (Gold)", special: "Flying; Breath attack; immune to lvl 1-3 (Green) / 1-4 (Gold) spells"}
+
+  tower:
+    theme: "Mages, golems, genies"
+    native_terrain: "snow"
+    tier_1: {base: "Gremlin", upgraded: "Master Gremlin", atk: 3, def: 3, hp: 4, speed: 4, dmg: "1-2", special: "Ranged"}
+    tier_2: {base: "Stone Gargoyle", upgraded: "Obsidian Gargoyle", atk: 6, def: 6, hp: 15, speed: 6, dmg: "2-3", special: "Flying; immune to mind spells"}
+    tier_3: {base: "Stone Golem", upgraded: "Iron Golem", atk: 7, def: 10, hp: 30, speed: 3, dmg: "4-5", special: "50% magic resistance; immune to morale"}
+    tier_4: {base: "Mage", upgraded: "Arch Mage", atk: 13, def: 9, hp: 30, speed: 8, dmg: "7-9", special: "Ranged; Arch Mage: dispels beneficial spells on hit"}
+    tier_5: {base: "Genie", upgraded: "Master Genie", atk: 12, def: 12, hp: 50, speed: 9, dmg: "10-20", special: "Halves enemy stack count (random); casts beneficial spells"}
+    tier_6: {base: "Naga", upgraded: "Naga Queen", atk: 16, def: 13, hp: 110, speed: 7, dmg: "15-20", special: "No enemy retaliation"}
+    tier_7: {base: "Giant", upgraded: "Titan", atk: 24, def: 24, hp: 300, speed: 11, dmg: "40-60", special: "Ranged; immune to mind spells; Hates Black Dragons"}
+
+  inferno:
+    theme: "Demons, fire"
+    native_terrain: "lava"
+    tier_1: {base: "Imp", upgraded: "Familiar", atk: 2, def: 3, hp: 4, speed: 5, dmg: "1-2", special: "Familiar: drains 2 mana on hit"}
+    tier_2: {base: "Gog", upgraded: "Magog", atk: 6, def: 5, hp: 13, speed: 6, dmg: "2-5", special: "Ranged fireball (Magog: AoE)"}
+    tier_3: {base: "Hell Hound", upgraded: "Cerberus", atk: 10, def: 7, hp: 25, speed: 8, dmg: "4-6", special: "Cerberus: no enemy retaliation; attacks 3 adjacent"}
+    tier_4: {base: "Demon", upgraded: "Horned Demon", atk: 9, def: 9, hp: 40, speed: 6, dmg: "5-8", special: "Raise Demon: resurrect fallen Imps/Familiars"}
+    tier_5: {base: "Pit Fiend", upgraded: "Pit Lord", atk: 15, def: 12, hp: 50, speed: 8, dmg: "12-16", special: "Pit Lord: Raise Demon, Death Stare (instant kill chance)"}
+    tier_6: {base: "Efreet", upgraded: "Efreet Sultan", atk: 18, def: 18, hp: 90, speed: 13, dmg: "16-24", special: "Flying; Fire Shield 20%; immune to fire; Sultan: +12 atk vs good units"}
+    tier_7: {base: "Devil", upgraded: "Arch Devil", atk: 26, def: 28, hp: 200, speed: 17, dmg: "25-45", special: "Flying teleport; No enemy retaliation; Luck -2 to enemies; Hates Angels"}
+
+  necropolis:
+    theme: "Undead, necromancy"
+    native_terrain: "dirt"
+    tier_1: {base: "Skeleton", upgraded: "Skeleton Warrior", atk: 5, def: 4, hp: 6, speed: 4, dmg: "1-3"}
+    tier_2: {base: "Walking Dead", upgraded: "Zombie", atk: 5, def: 5, hp: 20, speed: 3, dmg: "2-3", special: "Zombie: disease ability (reduces max HP)"}
+    tier_3: {base: "Wight", upgraded: "Wraith", atk: 7, def: 7, hp: 18, speed: 6, dmg: "3-7", special: "Wraith: drains 2 spell points"}
+    tier_4: {base: "Vampire", upgraded: "Vampire Lord", atk: 10, def: 9, hp: 40, speed: 9, dmg: "5-8", special: "Flying; Vampire Lord: no retaliation, drain HP (no stack loss)"}
+    tier_5: {base: "Lich", upgraded: "Power Lich", atk: 13, def: 10, hp: 30, speed: 7, dmg: "11-15", special: "Ranged death cloud AoE; affects own troops"}
+    tier_6: {base: "Black Knight", upgraded: "Dread Knight", atk: 16, def: 16, hp: 120, speed: 8, dmg: "15-30", special: "Curse on hit; Dread Knight: Death Blow (double damage chance)"}
+    tier_7: {base: "Bone Dragon", upgraded: "Ghost Dragon", atk: 17, def: 15, hp: 150, speed: "12 (Bone) / 14 (Ghost)", dmg: "25-50", special: "Flying; Aging (Ghost: halves max HP)"}
+
+  dungeon:
+    theme: "Dark elves, minotaurs"
+    native_terrain: "subterranean"
+    tier_1: {base: "Troglodyte", upgraded: "Infernal Troglodyte", atk: 4, def: 3, hp: 5, speed: 4, dmg: "1-3", special: "Blind to ranged (Infernal)"}
+    tier_2: {base: "Harpy", upgraded: "Harpy Hag", atk: 7, def: 7, hp: 17, speed: 6, dmg: "1-4", special: "Flying; Hag: no retaliation + returns to starting hex after attack"}
+    tier_3: {base: "Beholder", upgraded: "Evil Eye", atk: 8, def: 6, hp: 20, speed: 7, dmg: "3-5", special: "Ranged; Evil Eye: random debuff on hit"}
+    tier_4: {base: "Medusa", upgraded: "Medusa Queen", atk: 11, def: 9, hp: 35, speed: 7, dmg: "6-9", special: "Ranged + melee stone gaze (petrify on melee hit)"}
+    tier_5: {base: "Minotaur", upgraded: "Minotaur King", atk: 14, def: 12, hp: 50, speed: 8, dmg: "10-14", special: "King: always maximum morale"}
+    tier_6: {base: "Manticore", upgraded: "Scorpicore", atk: 15, def: 13, hp: 80, speed: 12, dmg: "14-18", special: "Flying; Scorpicore: paralyze on hit"}
+    tier_7: {base: "Red Dragon", upgraded: "Black Dragon", atk: 19, def: 19, hp: 200, speed: "12 (Red) / 15 (Black)", dmg: "30-40 (Red) / 40-50 (Black)", special: "Flying; Breath attack; Red: immune to fire; Black: full magic immunity; Hates Titans"}
+
+  stronghold:
+    theme: "Barbarians, orcs, cyclops"
+    native_terrain: "rough"
+    tier_1: {base: "Goblin", upgraded: "Hobgoblin", atk: 4, def: 2, hp: 5, speed: 5, dmg: "1-2"}
+    tier_2: {base: "Wolf Rider", upgraded: "Wolf Raider", atk: 7, def: 5, hp: 18, speed: 8, dmg: "3-5", special: "Raider: 2 attacks per turn"}
+    tier_3: {base: "Orc", upgraded: "Orc Chieftain", atk: 8, def: 5, hp: 20, speed: 5, dmg: "3-5", special: "Ranged; Chieftain: +1 speed bonus nearby"}
+    tier_4: {base: "Ogre", upgraded: "Ogre Mage", atk: 11, def: 6, hp: 60, speed: 5, dmg: "8-12", special: "Mage: casts Bloodlust on self"}
+    tier_5: {base: "Roc", upgraded: "Thunderbird", atk: 13, def: 11, hp: 60, speed: 10, dmg: "11-15", special: "Flying; Thunderbird: lightning strike on attack (no retaliation from that)"}
+    tier_6: {base: "Cyclops", upgraded: "Cyclops King", atk: 17, def: 13, hp: 80, speed: 8, dmg: "16-20", special: "Ranged; King: 20% chance to paralyze target for 3 rounds"}
+    tier_7: {base: "Behemoth", upgraded: "Ancient Behemoth", atk: 15, def: 5, hp: 300, speed: 8, dmg: "20-40", special: "Ignores 40% (Ancient: 80%) of enemy defense"}
+
+  fortress:
+    theme: "Lizardmen, serpents"
+    native_terrain: "swamp"
+    tier_1: {base: "Gnoll", upgraded: "Gnoll Marauder", atk: 3, def: 5, hp: 6, speed: 4, dmg: "2-3", special: "Marauder: double retaliation chance"}
+    tier_2: {base: "Lizardman", upgraded: "Lizard Warrior", atk: 6, def: 6, hp: 18, speed: 5, dmg: "2-4", special: "Ranged; Warrior: 2 ranged attacks"}
+    tier_3: {base: "Serpent Fly", upgraded: "Dragon Fly", atk: 9, def: 9, hp: 20, speed: 9, dmg: "2-8", special: "Flying; Dragon Fly: dispels beneficial spells on hit; Defense -3"}
+    tier_4: {base: "Basilisk", upgraded: "Greater Basilisk", atk: 11, def: 9, hp: 45, speed: 6, dmg: "6-9", special: "Petrify on hit (3 rounds); Greater: +5% chance"}
+    tier_5: {base: "Gorgon", upgraded: "Mighty Gorgon", atk: 12, def: 12, hp: 70, speed: 6, dmg: "10-14", special: "Mighty: Death Stare (instant kill chance)"}
+    tier_6: {base: "Wyvern", upgraded: "Wyvern Monarch", atk: 15, def: 15, hp: 120, speed: 12, dmg: "14-17", special: "Flying; Monarch: poison on hit"}
+    tier_7: {base: "Hydra", upgraded: "Chaos Hydra", atk: 14, def: 16, hp: 200, speed: 6, dmg: "15-25", special: "No enemy retaliation; Attacks all adjacent hexes; Chaos: death cloud on death"}
+
+  conflux:
+    theme: "Elementals, pixies, phoenixes"
+    native_terrain: "grass / magical"
+    note: "Added in Armageddon's Blade expansion"
+    tier_1: {base: "Pixie", upgraded: "Sprite", atk: 2, def: 2, hp: 3, speed: 7, dmg: "1-3", special: "Flying; Sprite: no retaliation"}
+    tier_2: {base: "Air Elemental", upgraded: "Storm Elemental", atk: 7, def: 7, hp: 22, speed: 10, dmg: "4-6", special: "Flying; immune to air; Storm: reduced speed penalty on enemies"}
+    tier_3: {base: "Water Elemental", upgraded: "Ice Elemental", atk: 7, def: 8, hp: 30, speed: 7, dmg: "4-7", special: "Immune to water; Ice: immune to fire"}
+    tier_4: {base: "Fire Elemental", upgraded: "Energy Elemental", atk: 10, def: 10, hp: 40, speed: 8, dmg: "7-11", special: "Immune to fire; Energy: drains 2 SP on hit"}
+    tier_5: {base: "Earth Elemental", upgraded: "Magma Elemental", atk: 11, def: 11, hp: 60, speed: 6, dmg: "8-10", special: "Immune to earth; Magma: fire damage strike"}
+    tier_6: {base: "Psychic Elemental", upgraded: "Magic Elemental", atk: 12, def: 12, hp: 70, speed: 9, dmg: "12-16", special: "No retaliation; Mental strike; Magic: fully immune to spells"}
+    tier_7: {base: "Firebird", upgraded: "Phoenix", atk: 16, def: 16, hp: 150, speed: "16 (Firebird) / 21 (Phoenix)", dmg: "20-40 (Firebird) / 40-60 (Phoenix)", special: "Flying; Rebirth (Phoenix: respawns once with half HP); immune to fire"}
+
+# ============================================================
+# SECTION 6: CREATURE SPEED TIERS
+# ============================================================
+
+speed_tiers:
+  immobile: {value: 0, examples: ["Catapult", "Ballista", "First Aid Tent"]}
+  ultra_slow: {value: 3, examples: ["Dendroid Guard", "Dwarf", "Stone Golem", "Walking Dead", "Peasant"]}
+  very_slow: {value: 4, examples: ["Pikeman", "Gremlin", "Skeleton", "Gnoll", "Troglodyte"]}
+  slow: {value: 5, examples: ["Goblin", "Hobgoblin", "Imp", "Lizardman", "Orc"]}
+  medium: {value: "6-7", examples: ["Centaur", "Archer", "Wight", "Harpy", "Beholder", "Gog"]}
+  swift: {value: "8-9", examples: ["Griffin", "Cavalier", "Swordsman", "Mage", "Vampire", "Wolf Rider"]}
+  quick: {value: "10-11", examples: ["Roc", "Pegasus", "Air Elemental", "Titan", "Genie"]}
+  fast: {value: "12-14", examples: ["Manticore", "Bone Dragon", "Efreet", "Wyvern", "Ghost Dragon", "Green Dragon"]}
+  very_fast: {value: "15-17", examples: ["Devil", "Arch Devil", "Black Dragon"]}
+  blazing_fast: {value: "18-21", examples: ["Archangel (18)", "Azure Dragon (19)", "Phoenix (21)"]}
+
+# ============================================================
+# SECTION 7: AUDIO DESIGN
+# ============================================================
+
+audio:
+
+  music:
+    composer: "Paul Anthony Romero and Rob King"
+    style: "Orchestral fantasy with medieval/heroic motifs"
+    instrumentation:
+      - "Full string orchestra (violins, violas, cellos, bass)"
+      - "Brass section (horns, trumpets, trombones)"
+      - "Woodwinds (flutes, oboes)"
+      - "Choir (epic battle and menu themes)"
+      - "Percussion (timpani, war drums, cymbals)"
+      - "Harpsichord and lute (medieval feel)"
+      - "Pipe organ (necropolis/dark themes)"
+
+    tracks_by_context:
+      main_menu: "Grand orchestral fanfare, triumphant"
+      adventure_map_grass: "Peaceful pastoral melody with flute and strings"
+      adventure_map_dungeon: "Tense dark strings, minor key"
+      adventure_map_snow: "Cold, sparse, haunting woodwinds"
+      combat_standard: "Driving percussive battle music, brass-led"
+      combat_victory: "Triumphant short fanfare"
+      combat_defeat: "Somber low brass resolution"
+      castle_town: "Bright marching band + choir, heroic"
+      necropolis_town: "Organ + choir dirge, gothic"
+      inferno_town: "Heavy brass + drums, demonic"
+      tower_town: "Arcane, mystical strings and winds"
+      rampart_town: "Nature sounds + gentle strings, elvish"
+
+  sound_effects:
+    combat_hits:
+      sword_strike: "Metallic clang + thud"
+      arrow_impact: "Whoosh + thunk"
+      magic_missile: "Zap + sparkle"
+      fire_spell: "Roaring whoosh + crackle"
+      ice_spell: "Glass crack + shatter"
+      lightning: "Sharp crack + rumble"
+
+    creature_specific:
+      dragon: "Deep rumbling roar on attack"
+      skeleton: "Rattling bones clatter"
+      angel: "Choral voice + wing flap"
+      devil: "Demonic screech"
+      zombie: "Wet groan"
+      phoenix: "High-pitched screech + flame whoosh"
+
+    death_sounds:
+      small_creatures: "Short squeak/screech"
+      large_creatures: "Heavy thud + groan"
+      undead: "Bone crumble sound"
+
+    ui_sounds:
+      button_click: "Crisp stone-on-stone tap"
+      hex_hover: "Subtle soft tick"
+      end_turn: "Military drum tap"
+      spell_cast_begin: "Arcane hum building"
+      gold_pickup: "Coin jingle"
+      level_up: "Ascending arpeggio fanfare"
+
+    ambient:
+      grass_battlefield: "Wind, bird chirps, distant insects"
+      lava_battlefield: "Bubbling magma, hissing steam"
+      snow_battlefield: "Howling wind, silence"
+      dungeon_battlefield: "Dripping water, echoes, low hum"
+      ocean_ambient: "Waves, seagulls"
+
+# ============================================================
+# SECTION 8: UI/UX SPECIFICATION
+# ============================================================
+
+ui_ux:
+
+  combat_screen_layout:
+    total_width: 800
+    total_height: 600
+
+    battlefield_area:
+      x: 0
+      y: 0
+      width: 595
+      height: 556
+      note: "Hex grid rendered here; background art fills this area"
+
+    right_panel:
+      x: 595
+      y: 0
+      width: 205
+      height: 600
+      components:
+        hero_portraits:
+          attacker: {x: 0, y: 0, w: 62, h: 68, note: "Left side of panel top"}
+          defender: {x: 143, y: 0, w: 62, h: 68, note: "Right side of panel top"}
+        creature_stacks:
+          slots_per_side: 7
+          note: "Attacker stacks on left column, defender on right column"
+          each_slot: "Creature icon ~32x32 + count number below"
+        action_buttons:
+          wait: "Large clickable button"
+          defend: "Large clickable button"
+          cast_spell: "Opens spellbook overlay"
+          auto_combat: "Toggle"
+          options: "Gear icon"
+          surrender: "White flag"
+          flee: "Running figure"
+
+    bottom_bar:
+      height: 44
+      components:
+        combat_log: "Scrollable text; shows 'X attacks Y for Z damage', morale events"
+        mana_indicator: "Current / Max spell points"
+        creature_info: "Name + count of currently selected/hovered creature"
+
+    hex_interaction_states:
+      default: "No highlight"
+      hovered_empty: "Soft blue-grey fill"
+      movement_reachable: "Blue tinted fill"
+      attack_target: "Red tinted fill + crosshair cursor"
+      selected_creature: "Bright outline around occupied hex"
+      ranged_in_range: "Full brightness target"
+      ranged_long_range: "Dimmed/orange target (50% penalty)"
+      blocked_by_obstacle: "No movement highlight"
+
+    damage_preview:
+      trigger: "Hover over valid attack target"
+      display: "Shows 'X - Y' damage range in bottom bar or tooltip"
+      position: "Bottom combat log area or floating near cursor"
+
+    initiative_queue:
+      position: "Optional: displayed as horizontal strip at top or side"
+      shows: "Order of next ~5-10 creatures in turn order with icons"
+      note: "Not in original HoMM3 but common quality-of-life addition"
+
+  spellbook_overlay:
+    style: "Full-screen book illustration overlay"
+    left_page: "Spell list by school (tabs)"
+    right_page: "Selected spell description + cost + effect preview"
+    school_tabs: ["Fire (flame icon)", "Water (wave icon)", "Earth (mountain icon)", "Air (cloud icon)"]
+    mana_display: "Current / Max shown at bottom"
+
+  hero_info_popup:
+    trigger: "Click on hero portrait"
+    shows: ["Primary stats (Attack, Defense, Power, Knowledge)", "Secondary skills", "Spell book", "Artifacts equipped"]
+
+# ============================================================
+# SECTION 9: WHAT SEPARATES HoMM3 FROM CHEAP CLONES
+# ============================================================
+
+quality_differentiators:
+
+  visual:
+    pre_rendered_3d_sprites:
+      description: "Sprites are baked 3D renders, not hand-drawn pixel art"
+      result: "Smooth gradients, realistic anatomy, proper lighting/shadow"
+      fake_it_with: "Use detailed pixel art at 64x64+ min, or procedural shading on vector sprites"
+
+    animation_richness:
+      frames_per_action: "6-16 frames per animation group (not 2-3 frame flip)"
+      idle_animation: "Creatures always subtly moving (breathing, shifting)"
+      separate_directional_attacks: "Distinct frames for attacking up/straight/down"
+      death_animation: "Full death sequence ending in static corpse, not disappear"
+
+    battlefield_artwork:
+      style: "Detailed painted backgrounds, not tiled pattern"
+      detail: "Each terrain has foreground elements (rocks, trees, bones) giving depth"
+      parallax: "Some versions add subtle parallax on foreground elements"
+
+    spell_effects:
+      size: "Large, screen-filling effects for major spells (Armageddon, Chain Lightning)"
+      layering: "Effects layer over sprites correctly (fire behind/around creatures)"
+      duration: "0.5-2.0 seconds, not instant"
+
+    damage_feedback:
+      floating_numbers: "Every hit shows damage number floating up"
+      hit_flash: "Creature briefly flashes white/red on hit"
+      screen_shake: "Very subtle shake on heavy hits (optional, tasteful)"
+      color_coding: "Large damage = larger red numbers; small = white"
+      lucky_indicator: "Special golden flash + sound for lucky strikes"
+
+    ui_polish:
+      panel_art: "Panels have decorative stone/wood border artwork"
+      button_states: "Buttons have distinct hover/press/disabled states"
+      tooltips: "Hover any creature to see full stats popup"
+      smooth_scrolling: "Combat log scrolls smoothly"
+
+  mechanical:
+    complex_damage_formula: "Not just ATK - DEF; full multiplicative modifier chain"
+    initiative_subtleties: "Speed ties broken correctly; wait/defend mechanics"
+    luck_and_morale: "Probabilistic special events (not just flat bonuses)"
+    no_retaliation_variety: "Special abilities that meaningfully change tactics"
+    spell_mastery: "Same spell at 3 different power levels (basic/advanced/expert)"
+
+  audio:
+    creature_specific_sounds: "Each creature has unique attack + death sound"
+    positional_audio: "Hits on left side of screen sound from left"
+    layered_ambient: "Background ambient + battle music play simultaneously"
+    dynamic_music: "Victory/defeat stings on combat end, not abrupt stop"
+
+  common_cheap_clone_failures:
+    - "Static sprites (no animation, just a single image)"
+    - "Generic placeholder hit sounds or no sounds"
+    - "Flat colored hexes instead of terrain artwork"
+    - "No damage numbers displayed"
+    - "Creatures disappear on death instead of leaving corpse"
+    - "Ignoring morale and luck systems"
+    - "Single retaliation rules not implemented"
+    - "No spell visual effects, just stat number changes"
+    - "No creature idle animations"
+    - "Spellbook is plain HTML list, not illustrated overlay"
+    - "No directional attack differentiation"
+    - "Panel art is flat grey boxes"
+    - "Fonts are default browser sans-serif instead of styled fantasy font"
+
+# ============================================================
+# SECTION 10: TECHNICAL IMPLEMENTATION NOTES FOR AI CODE GEN
+# ============================================================
+
+implementation_notes:
+
+  hex_grid_math:
+    offset_type: "Even-row offset OR cube coordinate system recommended"
+    hex_to_pixel:
+      pointy_top: |
+        x = hex_size * sqrt(3) * (col + 0.5 * (row & 1))
+        y = hex_size * 1.5 * row
+    pixel_to_hex: "Reverse of above + rounding to nearest hex center"
+    neighbor_directions: 6
+    distance_formula: "Cube coordinate: max(|dx|, |dy|, |dz|)"
+    a_star_pathfinding: "Required for movement + AI; weight by terrain passability"
+
+  animation_system:
+    recommended: "Sprite sheet with CSS animation or Canvas requestAnimationFrame"
+    frame_timing: "~80-120ms per frame for combat animations (8-12 fps)"
+    idle_timing: "~150-200ms per frame for idle loops (5-7 fps)"
+    state_machine: "Each creature has animation state: IDLE | MOVING | ATTACKING | HIT | DYING | DEAD"
+
+  rendering_layers:
+    order_back_to_front:
+      1: "Background terrain art (static image)"
+      2: "Terrain overlays / obstacles"
+      3: "Hex grid overlay (semi-transparent)"
+      4: "Movement/attack highlights"
+      5: "Creature sprites (sorted by row, lower row = drawn last = appears in front)"
+      6: "Spell effect animations"
+      7: "Floating damage numbers"
+      8: "UI panels (always on top)"
+
+  recommended_js_approach:
+    canvas: "HTML5 Canvas for battlefield rendering (better performance)"
+    ui_panels: "HTML/CSS for panel elements (easier to style)"
+    hybrid: "Canvas for game world + DOM overlay for UI = best of both"
+    library_options:
+      - "PixiJS (WebGL-accelerated, good for sprites)"
+      - "Phaser 3 (full game framework with physics, input, scenes)"
+      - "Plain Canvas2D (most control, most code)"
+
+  priority_implementation_order:
+    1: "Hex grid render + click/hover interaction"
+    2: "Creature placement on hexes"
+    3: "Turn order system (speed-based queue)"
+    4: "Melee attack with retaliation"
+    5: "Damage formula (ATK vs DEF)"
+    6: "Death and corpse display"
+    7: "Ranged attack with distance penalty"
+    8: "Flying movement"
+    9: "Spell system (start with 5-6 most common spells)"
+    10: "Morale and luck events"
+    11: "Hero portraits and stat panel"
+    12: "Spell visual effects"
+    13: "Floating damage numbers"
+    14: "Audio"
+    15: "Siege combat"
+    16: "Full 9-faction creature roster"
